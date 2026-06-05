@@ -14,7 +14,7 @@ The quickest way is the one-click buttons on the splash page —
 
 ### Cursor
 
-[**▸ Add to Cursor**](cursor://anysphere.cursor-deeplink/mcp/install?name=omni&config=eyJ1cmwiOiJodHRwczovL29tbmkuYXJjYWRlLmRldi9tY3AifQ==)
+[![Add omni MCP server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=omni&config=eyJ1cmwiOiJodHRwczovL29tbmkuYXJjYWRlLmRldi9tY3AifQ==)
 
 Or: **Cursor Settings → MCP → Add server**, then use the endpoint above.
 
