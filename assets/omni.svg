@@ -1,0 +1,22 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Omni by Arcade">
+  <rect width="100" height="100" rx="20" fill="#0a0a0b"/>
+  <g fill="#ececea">
+    <rect x="18" y="18" width="12" height="12"/>
+    <rect x="31" y="18" width="12" height="12"/>
+    <rect x="44" y="18" width="12" height="12"/>
+    <rect x="57" y="18" width="12" height="12"/>
+    <rect x="18" y="31" width="12" height="12"/>
+    <rect x="70" y="31" width="12" height="12"/>
+    <rect x="18" y="44" width="12" height="12"/>
+    <rect x="44" y="44" width="12" height="12"/>
+    <rect x="70" y="44" width="12" height="12"/>
+    <rect x="18" y="57" width="12" height="12"/>
+    <rect x="70" y="57" width="12" height="12"/>
+    <rect x="18" y="70" width="12" height="12"/>
+    <rect x="31" y="70" width="12" height="12"/>
+    <rect x="44" y="70" width="12" height="12"/>
+    <rect x="57" y="70" width="12" height="12"/>
+    <rect x="70" y="70" width="12" height="12"/>
+  </g>
+  <rect x="70" y="18" width="12" height="12" fill="#3ee07a"/>
+</svg>

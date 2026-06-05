@@ -1,0 +1,17 @@
+{
+  "name": "omnimcp",
+  "owner": {
+    "name": "Arcade.dev",
+    "email": "support@arcade.dev"
+  },
+  "metadata": {
+    "description": "OmniMCP provides agents access to services like Slack, Gmail, GitHub, Linear, Notion, Dropbox, and other similar services."
+  },
+  "plugins": [
+    {
+      "name": "omnimcp",
+      "source": "./",
+      "description": "OmniMCP provides agents access to services like Slack, Gmail, GitHub, Linear, Notion, Dropbox, and other similar services."
+    }
+  ]
+}

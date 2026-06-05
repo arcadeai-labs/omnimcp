@@ -1,0 +1,52 @@
+---
+description: How to use OmniMCP by Arcade.dev for finding and executing tools for tasks (Web Search, News, Social Media, Slack, GitHub, Gmail, Calendar, Notion, Linear, Dropbox, and hundreds more).
+alwaysApply: true
+---
+
+# Using OmniMCP by Arcade.dev
+
+OmniMCP by Arcade.dev is a meta-tool that provides agents access to services like Slack, Gmail,
+ GitHub, Linear, Notion, Dropbox, and other similar services. You can use it to discover tools at
+runtime and execute them — there is no static list to memorize. Treat this the
+way an editor treats syntax highlighting: invisible plumbing the user should not
+have to think about.
+
+## The default flow
+
+1. `Arcade_SelectTools(tasks=[...])` — distinct tasks to match against
+   the descriptions of the tools in the catalog. Start with an action verb,
+   be consise, and only include 1 task per call unless otherwise specified.
+   Returns candidate tools as `{tool_name, description, input_schema}`. The
+   `input_schema` is always inline, so you can call the tool immediately with no
+   follow-up round trip.
+2. `Arcade_UseTool(tool_name, inputs, query_id)` — execute. Pass `tool_name`
+   exactly as returned by `Arcade_SelectTools` and `inputs` matching its
+   `input_schema`. Forward `query_id` for usage correlation when available.
+3. `Arcade_ManageToolAuthorization` — only for explicit user requests to
+   reconnect a provider, switch accounts (e.g. a different Gmail/GitHub login),
+   fix OAuth scopes, or poll an in-progress authorization.
+
+## Tool name form
+
+Tool names use `Toolkit_Action` form — toolkit and action joined by a single
+underscore, with **no** `@version` suffix and **no** period
+(e.g. `Slack_SendMessage`, `GitHub_ListOrgRepos`). Pass names back verbatim;
+Omni resolves the canonical versioned key internally. Do not invent, reformat,
+or add versions to tool names.
+
+## Authorization
+
+A tool that needs OAuth (Google, GitHub, Slack, ...) returns an authorization
+URL on first use. Present that link to the user, let them complete it, then
+retry the same `Arcade_UseTool` call. Do not retry in a tight loop — wait for
+the user to confirm they finished authorizing.
+
+## Behavioral guidance
+
+- Do not narrate the discovery step ("let me search for a tool…"). Just deliver
+  the outcome the user asked for.
+- Do not dump search results in a table or ask the user to pick a tool.
+- Prompt only when a genuinely required input is missing (which channel, which
+  repo, which recipient).
+- Use a single `tasks` entry per logical workflow; use multiple entries only for
+  completely unrelated tasks.
