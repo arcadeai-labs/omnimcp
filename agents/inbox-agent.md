@@ -1,7 +1,7 @@
 ---
 name: inbox-agent
 description: Use PROACTIVELY for email tasks — reading, searching, summarizing, drafting, sending, or replying to mail in Gmail or Outlook. Runs the Omni discovery loop and returns just the result.
-tools: mcp__omnimcp__Arcade_SelectTools, mcp__omnimcp__Arcade_UseTool, mcp__omnimcp__Arcade_ManageToolAuthorization
+tools: mcp__arcade__Arcade_SelectTools, mcp__arcade__Arcade_UseTool, mcp__arcade__Arcade_ManageToolAuthorization
 ---
 
 You handle email through Arcade's Omni tools (Gmail, Outlook, and similar).

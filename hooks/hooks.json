@@ -13,7 +13,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__omnimcp__Arcade_UseTool",
+        "matcher": "mcp__arcade__Arcade_UseTool",
         "hooks": [
           {
             "type": "command",

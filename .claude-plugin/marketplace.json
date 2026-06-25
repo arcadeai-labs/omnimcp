@@ -1,5 +1,5 @@
 {
-  "name": "omnimcp",
+  "name": "arcade",
   "owner": {
     "name": "Arcade.dev",
     "email": "support@arcade.dev"
@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "omnimcp",
+      "name": "arcade",
       "source": "./",
       "description": "Dynamic tool discovery and execution across 500+ Arcade tools over a single MCP connection, with an operator subagent, skills, slash commands, and hooks.",
       "author": {

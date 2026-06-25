@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// PostToolUse hook (matched to mcp__omnimcp__Arcade_UseTool): if the tool result
+// PostToolUse hook (matched to mcp__arcade__Arcade_UseTool): if the tool result
 // contains an OAuth authorization URL, surface it clearly so it isn't buried in
 // the result. Always exits 0 so it can never block tool flow.
 

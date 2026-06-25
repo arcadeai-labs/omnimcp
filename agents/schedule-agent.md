@@ -1,7 +1,7 @@
 ---
 name: schedule-agent
 description: Use PROACTIVELY for calendar and scheduling tasks — checking availability, listing events, creating/updating/canceling meetings in Google Calendar or Outlook Calendar. Runs the Omni discovery loop and returns just the result.
-tools: mcp__omnimcp__Arcade_SelectTools, mcp__omnimcp__Arcade_UseTool, mcp__omnimcp__Arcade_ManageToolAuthorization
+tools: mcp__arcade__Arcade_SelectTools, mcp__arcade__Arcade_UseTool, mcp__arcade__Arcade_ManageToolAuthorization
 ---
 
 You handle calendars and scheduling through Arcade's Omni tools (Google

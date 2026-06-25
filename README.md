@@ -13,7 +13,7 @@ also live on the splash page — **[omni.arcade.dev](https://omni.arcade.dev)**.
 
 ## Cursor
 
-[![Add omni MCP server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=omni&config=eyJ1cmwiOiJodHRwczovL29tbmkuYXJjYWRlLmRldi9tY3AifQ==)
+[![Add arcade MCP server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=arcade&config=eyJ1cmwiOiJodHRwczovL29tbmkuYXJjYWRlLmRldi9tY3AifQ==)
 
 Or install the plugin from the Cursor Marketplace, or add the server manually:
 **Cursor Settings → MCP → Add server**, then use the endpoint above.
@@ -24,14 +24,14 @@ Install the plugin to get the operator subagent, skills, and slash commands:
 
 ```bash
 /plugin marketplace add arcadeai-labs/omnimcp
-/plugin install omnimcp
-/mcp        # authenticate "omnimcp" with Arcade
+/plugin install arcade
+/mcp        # authenticate "arcade" with Arcade
 ```
 
 Or just add the bare connection (no subagents/commands):
 
 ```bash
-claude mcp add --transport http omnimcp https://omni.arcade.dev/mcp
+claude mcp add --transport http arcade https://omni.arcade.dev/mcp
 ```
 
 Once installed, try `/omni summarize my unread email`, or just ask in plain

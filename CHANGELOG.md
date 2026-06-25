@@ -21,6 +21,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- The plugin is now installed and referenced as `arcade` across all clients
+  (Cursor, Claude Code, Claude Desktop), and the MCP server key is `arcade`
+  (Claude Code tools are `mcp__arcade__Arcade_*`).
 - README now covers all three client targets (Cursor, Claude Code, Claude
   Desktop) and documents the repo layout.
 
