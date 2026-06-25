@@ -1,5 +1,5 @@
 ---
-name: omni-tool-use
+name: arcade-tool-use
 description: How to get things done with external services via Arcade Omni — Slack, Gmail, GitHub, Google Calendar, Notion, Linear, Drive, and 500+ more. Use when the user asks to send, post, fetch, search, schedule, create, or update anything in a third-party app.
 ---
 
@@ -15,7 +15,7 @@ about.
 When a task needs an external service, prefer handing it to a subagent so the
 discovery noise stays out of the main conversation:
 
-- General tasks → `omni-operator`
+- General tasks → `arcade-operator`
 - Email → `inbox-agent`
 - Calendar / scheduling → `schedule-agent`
 
@@ -27,7 +27,7 @@ discovery noise stays out of the main conversation:
    exactly as returned: `Toolkit_Action` form, **no** `@version` suffix, **no**
    period. Pass the originating `query_id`.
 3. `Arcade_ManageToolAuthorization` — only for explicit requests to reconnect a
-   provider, switch accounts, or fix scopes (see the `omni-authorization` skill).
+   provider, switch accounts, or fix scopes (see the `arcade-authorization` skill).
 
 ## Behavior
 

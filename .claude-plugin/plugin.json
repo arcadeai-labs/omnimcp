@@ -26,12 +26,12 @@
     "automation"
   ],
   "commands": [
-    "./commands/omni.md",
-    "./commands/omni-tools.md",
-    "./commands/omni-auth.md"
+    "./commands/arcade.md",
+    "./commands/arcade-tools.md",
+    "./commands/arcade-auth.md"
   ],
   "agents": [
-    "./agents/omni-operator.md",
+    "./agents/arcade-operator.md",
     "./agents/inbox-agent.md",
     "./agents/schedule-agent.md"
   ]

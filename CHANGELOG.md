@@ -9,11 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **Claude Code plugin** (`.claude-plugin/`): installable via
   `/plugin marketplace add arcadeai-labs/omnimcp`.
-  - Subagents (`agents/`): `omni-operator` (general), `inbox-agent` (email),
+  - Subagents (`agents/`): `arcade-operator` (general), `inbox-agent` (email),
     and `schedule-agent` (calendar) run the discovery loop in an isolated
     context so it never clutters the main conversation.
-  - Skills (`skills/`): `omni-tool-use` and `omni-authorization`.
-  - Slash commands (`commands/`): `/omni`, `/omni-tools`, `/omni-auth`.
+  - Skills (`skills/`): `arcade-tool-use` and `arcade-authorization`.
+  - Slash commands (`commands/`): `/arcade`, `/arcade-tools`, `/arcade-auth`.
   - Hooks (`hooks/`): session-start availability priming and post-tool
     authorization-link surfacing.
 - **Claude Desktop** connector config (`clients/claude-desktop/`).

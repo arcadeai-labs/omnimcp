@@ -1,5 +1,5 @@
 ---
-name: omni-authorization
+name: arcade-authorization
 description: Handle Arcade Omni authorization — connecting a provider for the first time, reconnecting, switching accounts (e.g. a different Gmail or GitHub login), or fixing missing OAuth scopes. Use when a tool returns an authorization link or the user asks to reconnect, re-authorize, or switch accounts.
 ---
 
