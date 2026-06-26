@@ -10,17 +10,6 @@
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "mcp__arcade__Arcade_UseTool",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-surface-auth.mjs\""
-          }
-        ]
-      }
     ]
   }
 }

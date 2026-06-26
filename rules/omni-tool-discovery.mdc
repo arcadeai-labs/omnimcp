@@ -22,9 +22,8 @@ have to think about.
 2. `Arcade_UseTool(tool_name, inputs, query_id)` — execute. Pass `tool_name`
    exactly as returned by `Arcade_SelectTools` and `inputs` matching its
    `input_schema`. Forward `query_id` for usage correlation when available.
-3. `Arcade_ManageToolAuthorization` — only for explicit user requests to
-   reconnect a provider, switch accounts (e.g. a different Gmail/GitHub login),
-   fix OAuth scopes, or poll an in-progress authorization.
+3. `Arcade_Apps` — only when the user explicitly asks to see which apps are
+   connected or to disconnect one (`action: "list"` / `action: "disconnect"`).
 
 ## Tool name form
 
@@ -34,12 +33,13 @@ underscore, with **no** `@version` suffix and **no** period
 Omni resolves the canonical versioned key internally. Do not invent, reformat,
 or add versions to tool names.
 
-## Authorization
+## Signing in to apps
 
-A tool that needs OAuth (Google, GitHub, Slack, ...) returns an authorization
-URL on first use. Present that link to the user, let them complete it, then
-retry the same `Arcade_UseTool` call. Do not retry in a tight loop — wait for
-the user to confirm they finished authorizing.
+The first time a task needs an app the user hasn't connected (Google, GitHub,
+Slack, ...), the tool returns a one-time sign-in link. Present that link to the
+user, let them complete it, then retry the same `Arcade_UseTool` call. Do not
+retry in a tight loop — wait for the user to confirm they finished signing in.
+Use "app" / "sign in" / "connected" language, not authorization/OAuth/scopes.
 
 ## Behavioral guidance
 

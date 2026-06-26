@@ -3,15 +3,16 @@
 // Always exits 0 so it can never block a session from starting.
 
 try {
+  // Declarative environment facts (not imperative instructions): stating what is
+  // available reads as project context. Behavior lives in the skills/subagents.
   const context = [
-    "Omni (OmniMCP by Arcade.dev) is installed and exposes 500+ external tools",
-    "(Slack, Gmail, GitHub, Google Calendar, Notion, Linear, Drive, and more) via",
-    "a single MCP connection. For ANY task involving an external service, prefer",
-    "delegating to a subagent so discovery stays out of the main context:",
-    "arcade-operator (general), inbox-agent (email), schedule-agent (calendar).",
-    "If a tool returns an authorization link, present it to the user and retry",
-    "after they approve — never loop on auth. If the arcade MCP server is not",
-    "connected yet, tell the user to run /mcp and authenticate with Arcade.",
+    "Arcade (OmniMCP by Arcade.dev) is connected as the \"arcade\" MCP server and",
+    "exposes 500+ external-service tools (Slack, Gmail, GitHub, Google Calendar,",
+    "Notion, Linear, Drive, and more) over one connection. Three subagents cover",
+    "these tasks: arcade-operator (general), inbox-agent (email), schedule-agent",
+    "(calendar). Connected-app management is available via the /arcade:apps",
+    "command. The using-arcade-tools and managing-arcade-apps skills describe the",
+    "tool-discovery and app sign-in flow.",
   ].join(" ");
 
   process.stdout.write(

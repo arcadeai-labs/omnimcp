@@ -1,302 +1,342 @@
-# Connected Apps — Spec
+# Apps Rename + Minimal Apps Management — Spec
 
 Status: Draft / proposal
 Owner: Arcade (Omni + plugin)
-Scope: Omni MCP server changes + `arcade` plugin changes
+Scope: Minimal changes only (rename to apps + list/disconnect)
 
 ## 1. Goal
 
-Give users one clean way to **see, connect, and disconnect the apps** Arcade can
-act on their behalf — Google, GitHub, Slack, Linear, Notion, Microsoft, Asana,
-and so on.
+Keep this simple:
+- End users should interact with **apps** language.
+- Provide two operations only: **list apps** and **disconnect app**.
+- Avoid extra architecture (no static catalog files, no runtime normalization or translation layers).
 
-Today there is no app-level surface. To answer "what's connected?" the agent
-guesses a representative tool per provider and probes
-`Arcade_ManageToolAuthorization(status)` — see the reference session that took
-**14 calls and 3 `404 tool not found` errors** to produce one list, and still
-couldn't disconnect anything. This spec replaces that with a first-class
-**Apps** concept.
+## 2. Explicit scope
 
-Good news from the code review: the **Engine primitives already exist and Omni
-already calls them** (list connections + delete connection — see §5.2). The work
-is almost entirely a new MCP surface + presentation, not backend plumbing.
+### In scope
 
-## 2. Principles
+1. Command rename and UX copy:
+   - command set is exactly: `do`, `apps`, `tools`
+   - `apps` replaces `auth`
+2. Omni MCP surface:
+   - add `Arcade_Apps(action, app_id?)`
+   - actions: `list`, `disconnect`
+3. PostHog tracking for the new apps flow.
 
-1. **Users think in "apps," not plumbing.** The end user must never see the
-   words *authorization*, *OAuth*, *scopes*, *tokens*, *providers*, or
-   *connections*. They see **apps**, **connected / not connected**,
-   **permissions**, **sign in**, **disconnect**, **switch account**.
-2. **One authoritative list.** "What apps do I have?" is a single call, not N
-   probes.
-3. **No guessing.** The model never invents tool names to infer state.
-4. **Symmetric verbs.** If a user can connect an app, they can disconnect it and
-   switch the account.
+### Out of scope
 
-## 3. Vocabulary mapping (internal → what the user sees)
+- `connect`
+- `switch_account`
+- Runtime aliasing/normalization (`Google` vs `google` vs `omni-google`)
+- Runtime text translation middleware
+- New config/static data files for app mapping
 
-| Internal concept | User-facing term |
-|---|---|
-| provider / `omni-google`, `omni-github` … | **App** ("Google", "GitHub") |
-| toolkit (Gmail, Calendar, Drive) | **What it can do** / services within an app |
-| authorization exists / token valid | **Connected** |
-| no authorization | **Not connected** |
-| OAuth flow / authorize URL | **Sign in** / **Connect** |
-| revoke / delete token | **Disconnect** |
-| reauthorize / switch_account | **Switch account** / **Reconnect** |
-| scopes | **Permissions** (humanized labels) |
-| account `sub` / login | **Connected as `<email/username>`** |
+## 3. User-facing language
 
-## 4. Data model
+Use:
+- app, connected, not connected, permissions, disconnect
 
-### 4.1 App
+Avoid in user-visible responses:
+- authorization, oauth, scope, provider, token, connection
+
+This is done via command/agent/skill prompt text only.
+
+## 4. Omni changes
+
+## 4.1 New MCP tool
+
+```
+Arcade_Apps(action, app_id?)
+```
+
+| action | args | return |
+|---|---|---|
+| `list` | none | `{ "apps": [App, ...] }` |
+| `disconnect` | `app_id` required | `{ "app_id": "...", "disconnected": true, "connections_deleted": N, "was_connected_before": bool }` |
+
+### App object (list output — app-shaped, no raw plumbing)
 
 ```jsonc
 {
-  "app_id": "google",                 // stable slug
-  "name": "Google",                   // display name
-  "connected": true,                  // any valid authorization present
-  "account": "sam@arcade.dev",        // identity of the connected account, or null
-  "services": ["Gmail", "Calendar", "Drive"],  // human list of what it powers
-  "permissions": [                    // humanized, with granted state
-    { "id": "gmail.send",        "label": "Send email",            "granted": true },
-    { "id": "calendar.readonly", "label": "Read your calendar",    "granted": true },
-    { "id": "drive.file",        "label": "Access files you open", "granted": true }
-  ],
-  "last_used": "2026-06-25T20:11:00Z" // optional
+  "app_id": "google",           // provider_id with the omni- prefix stripped
+  "name": "Google",             // ProviderDescription, else title-cased app_id
+  "connected": true,
+  "account": "sam@arcade.dev",  // from provider_user_info, or null
+  "permissions": ["..."]        // granted scope strings, framed as "permissions" in copy
 }
 ```
 
-Notes:
-- `connected` is app-level: true when the user has a connection with an active
-  `connection_status` for any provider backing the app.
-- `permissions` are the **scopes currently granted** on the connection
-  (`UserConnection.scopes`), humanized. Arcade grants scopes incrementally (per
-  tool, as used), so this reflects what's granted *now*. A task that needs a
-  not-yet-granted permission surfaces at tool-use time via the requirements
-  check (and triggers a "connect/upgrade" prompt) — it is not pre-computed in the
-  list. `granted` is therefore `true` for everything `list` returns; it exists in
-  the schema for forward-compat with a future "available but not granted" view.
-- `account` comes from `UserConnection.provider_user_info`, already safe-filtered
-  by Omni to `email`/`login`/`name`/`username` (`safeProviderUserInfo`).
-- One app may be backed by **multiple providers/toolkits** (e.g. Microsoft →
-  Outlook, OneDrive, SharePoint, Outlook Calendar). In practice these share one
-  provider (`omni-microsoft`); the catalog (4.2) rolls them up by `provider_id`.
+The tool shapes its own output (in-tool, not a separate translation layer). Raw
+`provider_id`/scope plumbing stays internal.
 
-### 4.2 App catalog (Omni-owned)
+## 4.2 App universe (allowlist-derived)
 
-A static overlay Omni maintains. `app_id` is the `provider_id` with the `omni-`
-prefix stripped (`omni-google` → `google`). `connect_tool` is the representative
-tool used to drive app-level `connect` (see §5.3):
+`list` shows connected AND not-connected apps. The candidate universe is derived
+dynamically — no hardcoded map:
 
-```jsonc
-{
-  "google":    { "name": "Google",    "providers": ["omni-google"],    "services": ["Gmail","Calendar","Drive","Docs"], "connect_tool": "Gmail_WhoAmI" },
-  "github":    { "name": "GitHub",    "providers": ["omni-github"],    "services": ["GitHub"],                         "connect_tool": "GitHub_WhoAmI" },
-  "slack":     { "name": "Slack",     "providers": ["omni-slack"],     "services": ["Slack"],                          "connect_tool": "Slack_ListConversations" },
-  "linear":    { "name": "Linear",    "providers": ["omni-linear"],    "services": ["Linear"],                         "connect_tool": "Linear_ListIssues" },
-  "notion":    { "name": "Notion",    "providers": ["omni-notion"],    "services": ["Notion"],                         "connect_tool": "NotionToolkit_WhoAmI" },
-  "asana":     { "name": "Asana",     "providers": ["omni-asana"],     "services": ["Asana"],                          "connect_tool": "Asana_ListWorkspaces" },
-  "microsoft": { "name": "Microsoft", "providers": ["omni-microsoft"], "services": ["Outlook","OneDrive","SharePoint","Outlook Calendar"], "connect_tool": "MicrosoftOnedrive_WhoAmI" }
-}
-```
+- Enumerate allowlisted tools via `engine.ListTools`, filter with `ToolAllowlist`,
+  read each tool's `requirements.authorization.provider_id`, dedupe. Build/cache
+  at startup (refreshed), never per request.
+- Per request, fetch `ListUserConnections(userID, "")` for connected state.
+- The list = (universe ∪ connected providers), each marked connected / not connected.
 
-The provider list and `app_id`s can be derived automatically from the allowlist +
-tool requirements (§5.5); this static table only adds display names, the human
-"services" grouping, and the `connect_tool`. Pick each `connect_tool` from a tool
-known to exist in the catalog (the reference session's `*_WhoAmI` calls confirm
-several) so `connect` never 404s.
+## 4.3 Engine API mapping (already available)
 
-### 4.3 Permission humanization
+- `list`: `GET /v1/tools` (universe, cached) + `GET /v1/admin/user_connections?user_id=<verified-user>` (connected state)
+- `disconnect`: list by provider then `DELETE /v1/admin/user_connections/{id}` for each matching connection
 
-A scope → label dictionary owned by Omni (fallback to a generic label for
-unknown scopes), e.g.:
+Existing Omni client methods already support this:
+- `ListTools(identity, opts)`
+- `ListUserConnections(userID, providerID)`
+- `DeleteUserConnection(connectionID)`
 
-| Scope | Label |
-|---|---|
-| `https://www.googleapis.com/auth/gmail.send` | Send email |
-| `https://www.googleapis.com/auth/calendar.readonly` | Read your calendar |
-| `https://www.googleapis.com/auth/drive.file` | Access files you open with Arcade |
-| `channels:read` | Read channel list |
-| `Files.Read` | Read your files |
-| `read` (Linear) | Read your issues |
+## 4.4 App id handling (no normalization, no hardcoding)
 
-## 5. Omni (server) changes
+- `app_id` = `provider_id` with the `omni-` prefix stripped (presentation only);
+  always resolve back to the real `provider_id` internally.
+- `disconnect` resolves `app_id` against (universe ∪ connected) for the verified user.
+- **Idempotent:** a valid app with no live connections returns success with
+  `connections_deleted: 0, was_connected_before: false`.
+- `app_id_not_found` (with no side effects) is returned only when `app_id` is
+  neither connected nor in the universe; the message tells the caller to run
+  `Arcade_Apps(list)` first.
 
-### 5.1 New meta-tool: `Arcade_Apps`
+## 4.5 Security
 
-Replaces app-management duties; `Arcade_ManageToolAuthorization` stays for
-low-level per-tool repair (and as the mechanism this calls under the hood).
+- Always use the verified identity user id for list/disconnect; never a
+  caller-supplied id.
+- **Reject an empty/missing verified user id** before any admin list/delete call.
 
-```
-Arcade_Apps(action, app_id?, query_id?)
-```
+## 5. Plugin changes (`arcade`)
 
-| `action` | Args | Returns |
-|---|---|---|
-| `list` | — | `{ "apps": [App, …] }` (every app in the catalog, connected or not) |
-| `connect` | `app_id` | `{ "app_id", "connect_url", "message" }` — the "sign in" link |
-| `disconnect` | `app_id` | `{ "app_id", "connected": false }` — revokes all authorizations for the app |
-| `switch_account` | `app_id` | `{ "app_id", "connect_url" }` — disconnect + fresh sign-in |
+## 5.1 Commands
 
-Design rules:
-- `list` is **one call**, authoritative, provider-agnostic to the caller.
-- All responses use the App model in §4.1 (humanized permissions, friendly
-  names). No raw scopes/provider ids in the user-visible fields (keep raw values
-  in an optional `_debug` block if useful for the model).
-- `connect` drives the catalog's representative `connect_tool` for the app
-  (§5.3), so a first connect works without the user naming a specific tool.
+Final command set:
+- `do`
+- `apps` (new canonical)
+- `tools`
 
-### 5.2 How each action maps to today's Engine API
+Migration:
+- the `auth` command is **removed outright (no alias)**. Its old reconnect/scope-repair
+  behavior is gone; on-demand sign-in still surfaces inline during normal tasks.
 
-**list, disconnect, and switch_account need no new Engine endpoints.** Omni
-already calls all of them today in the `reauthorize`/`switch_account` path of
-`Arcade_ManageToolAuthorization` (`internal/tools/manage_tool_authorization.go`
-→ `resetAndAuthorize`). The typed methods already exist in
-`internal/engine/client.go`; `Arcade_Apps` just re-shapes them around apps.
+## 5.2 `/arcade:apps` behavior
 
-| Apps action | Existing Engine call(s) | Omni client method (exists today) |
-|---|---|---|
-| `list` | `GET /v1/admin/user_connections?user_id=<verified-user>` (omit `provider_id` → every app) | `ListUserConnections(userID, "")` |
-| `disconnect` | `GET /v1/admin/user_connections?...&provider_id=` then `DELETE /v1/admin/user_connections/{id}` per connection | `ListUserConnections` + `DeleteUserConnection` |
-| `switch_account` | delete connections + `POST /v1/tools/authorize` | already implemented as `resetAndAuthorize` |
-| `connect` | `POST /v1/tools/authorize` for a representative tool of the app | `AuthorizeTool` |
+- `/arcade:apps` -> list apps
+- `/arcade:apps disconnect <app_id>` -> disconnect app
 
-Each `UserConnection` already carries everything the App model needs:
-`provider_id`, `scopes`, `connection_status`, and `provider_user_info`
-(→ "Connected as"). So `Arcade_Apps(list)` is **one** `ListUserConnections` call,
-grouped by `provider_id` and overlaid with the catalog — replacing the 14-call,
-3×404 probing session entirely.
+No connect/switch actions in this command.
 
-`GET/DELETE /v1/admin/user_connections` require **admin auth**, which Omni already
-uses via its project API key (`doJSON(..., admin=true)`).
+## 5.3 Copy updates and removals
 
-### 5.3 The only real gap: app-level connect
+- Update static prompt text in command/agent/skill files to apps language. No runtime translation layer.
+- **Remove** the `auth` command file entirely.
+- **Remove** the PostToolUse auth-surfacing hook (`hooks/post-tool-surface-auth.mjs` and its
+  `hooks.json` block); its `mcp__arcade__Arcade_UseTool` matcher never fires under plugin
+  namespacing. The `SessionStart` hook stays.
+- Rename the `arcade-authorization` skill to `managing-arcade-apps` (and the
+  general `arcade-tool-use` skill to `using-arcade-tools`).
 
-Authorization is **tool-centric** — `POST /v1/tools/authorize` takes a `tool_name`,
-and there is no provider-level "authorize this app with its baseline scopes"
-endpoint. So `connect(app_id)` must pick a representative tool whose auth covers
-the app's baseline scopes and call `AuthorizeTool`. The catalog (§4.2) supplies a
-`connect_tool` per app (e.g. a low-scope read or `*_WhoAmI`).
+## 6. PostHog tracking (required)
 
-Optional future Engine work: a provider-level authorize endpoint
-(`POST /v1/auth/authorize { provider_id, scopes }`) so `connect` doesn't lean on a
-representative tool. **Not required for v1.**
+Current events:
+- `omni_select_tools`
+- `omni_use_tool`
+- `omni_manage_auth`
 
-### 5.4 Security
+Add:
+- `omni_apps_list`
+- `omni_apps_disconnect`
 
-`list`/`disconnect` use the admin API key and take a `user_id`. Omni MUST pass the
-**verified** Arcade user id from the MCP request identity (the same one it binds
-for tool execution) and never a caller-supplied value — otherwise a caller could
-enumerate or delete another user's connections.
+### Required properties
 
-### 5.5 Catalog source
+Common:
+- `action` (`list` or `disconnect`)
+- `result_type` (`success` or `error`)
+- `duration_ms`
+- `error_code`
+- `error_class` (`validation`, `engine_http`, `internal`)
+- `engine_status_code`
+- `service` (`omni`)
+- `environment`
+- `tenant`
+- `customer`
 
-Derive the catalog from the **allowlist** (`tools.allowed_tools` /
-`OMNI_TOOLS_ALLOWED`) plus each tool's `provider_id` (from the tool spec /
-`/v1/tools/requirements`): group allowed toolkits by `provider_id`, strip the
-`omni-` prefix for `app_id` (`omni-google` → `google`), and overlay a small static
-table for display names, the human "services" list, and the `connect_tool`. The
-catalog is also what lets `list` show **not-connected** apps — the admin endpoint
-only returns connections that already exist.
+List-specific:
+- `apps_total`
+- `apps_connected`
+- `apps_not_connected`
+- `connections_total`
 
-### 5.6 Phasing
+Disconnect-specific:
+- `app_id`
+- `connections_before`
+- `connections_deleted`
+- `connections_after`
+- `was_connected_before`
 
-- **Phase 1 (no Engine changes):** `Arcade_Apps(list, disconnect, switch_account)`
-  on the endpoints Omni already calls, plus `connect` via a representative tool
-  from the catalog. This already delivers the full see / connect / disconnect /
-  switch experience and removes the probing/404s.
-- **Phase 2 (optional polish):** provider-level authorize endpoint for cleaner
-  `connect`; richer permission metadata if Engine adds it.
+### Tracking guardrails
 
-## 6. Plugin (`arcade`) changes
+- Do not log auth URLs.
+- Do not log token values.
+- Do not log raw account identifiers in event properties.
 
-All user-facing names move from "auth/authorization" to **apps**.
+## 7. Rollout
 
-### 6.1 Command rename
+1. Add `Arcade_Apps(list|disconnect)` in Omni (PR A).
+2. Replace the `auth` command with `apps`, remove the PostToolUse hook, rename the skill (PR B).
+3. Add PostHog events.
 
-- `commands/auth.md` → `commands/apps.md` → **`/arcade:apps`**
-  - Description: "See and manage your connected apps (Google, Slack, GitHub, …)."
-  - Behavior: delegate to the `apps-agent` subagent; default to listing apps,
-    and handle "connect/disconnect/switch" phrasing in `$ARGUMENTS`.
+PR B must not be released until `Arcade_Apps` is live in **prod** Omni (plugin users hit prod).
 
-### 6.2 Skill rename
+## 8. Acceptance criteria
 
-- `skills/arcade-authorization/` → `skills/arcade-apps/`
-  - `name: arcade-apps`
-  - Teaches the **voice rules** (§6.5) and the `Arcade_Apps` flow.
+1. "What apps do I have enabled?" uses one `Arcade_Apps(list)` call.
+2. No probing loop over `ManageToolAuthorization(status)` for apps list.
+3. `/arcade:apps disconnect <app_id>` removes all matching connections.
+4. Disconnecting an already-not-connected (but valid) app succeeds idempotently (`connections_deleted: 0`).
+5. Unknown `app_id` (not connected and not in the universe) returns `app_id_not_found` with no side effects.
+6. PostHog includes full `omni_apps_list` and `omni_apps_disconnect` events with required properties.
 
-### 6.3 New subagent
+## 9. Cleanup and removals checklist
 
-- `agents/apps-agent.md` (`name: apps-agent`)
-  - Description: "Use when the user asks what apps are connected, or wants to
-    connect, disconnect, or switch the account for an app."
-  - Runs `Arcade_Apps(list)` and renders a table; uses `connect` / `disconnect`
-    / `switch_account` for actions. Inherits MCP tools (no `tools:` allowlist —
-    see the v0.2.1 fix).
+### 9.1 Code removals
 
-### 6.4 Copy changes in existing components
+- Remove any code path that probes app state via repeated
+  `ManageToolAuthorization(status)` calls.
+- Remove the `auth` command file entirely (no alias).
+- Remove the PostToolUse hook (`hooks/post-tool-surface-auth.mjs` + its `hooks.json` block).
+- Remove dead helper code introduced solely for auth-language responses if not
+  needed after apps-copy migration.
 
-- `arcade-operator` / `inbox-agent` / `schedule-agent`: when a tool needs auth,
-  say *"You need to connect your **Google** app — sign in here: `<url>`"* — never
-  "authorization required."
-- `hooks/post-tool-surface-auth.mjs`: change the injected text from "Omni needs
-  authorization…" to "Arcade needs you to **connect the `<App>` app**. Share this
-  sign-in link…".
-- `session-start-availability.mjs`: "If an app isn't connected yet, the user can
-  run `/arcade:apps` to connect it."
+### 9.2 Behavior cleanup
 
-### 6.5 Voice rules (bake into the apps skill)
+- Ensure `/arcade:apps` is the only recommended app-management path.
+- Ensure `do` and `tools` command descriptions do not instruct users to run
+  auth-specific workflows for app listing/disconnect.
+- Ensure error payloads for `Arcade_Apps` use `app_id_not_found` and do not leak
+  internal provider ids in user-facing text.
 
-- Say **app**, **connected / not connected**, **sign in / connect**,
-  **disconnect**, **switch account**, **permissions**.
-- Never say authorization, OAuth, scopes, tokens, providers, connections.
-- Show **Connected as `<account>`** when known.
-- Present permissions as friendly labels, not scope strings.
+## 10. Documentation updates checklist
 
-## 7. UX flows (what the user sees)
+Update all user-facing docs in the same change set:
 
-**"What apps do I have?"**
-> **Connected**
-> • **Google** — connected as sam@arcade.dev — Gmail, Calendar, Drive
-> • **GitHub** — connected
-> • **Slack** — connected (read access)
-> • **Linear** — connected
-> • **Microsoft** — connected — OneDrive
->
-> **Not connected:** Notion, Asana
->
-> Want to connect one? Just say "connect Notion."
+- `README.md`
+  - command list must be `do`, `apps`, `tools`
+  - examples use `/arcade:apps` for list/disconnect
+- `CHANGELOG.md`
+  - include rename (`auth` -> `apps`), new `Arcade_Apps`, telemetry updates
+- command files
+  - `commands/apps.md` (new canonical)
+  - `commands/auth.md` removed entirely (no alias)
+- skills/agent prompts
+  - apps language only
+  - remove references to users running auth-specific list flows
+- any release notes or marketplace copy
+  - reflect new command and behavior
 
-**"Connect Notion"** → returns a sign-in link.
-**"Disconnect Slack"** → "Slack disconnected."
-**"Switch my Google account"** → sign-in link for a different account.
+## 11. PR plan (ordered)
 
-(One `Arcade_Apps(list)` call instead of 14 probes; zero invented tool names.)
+Open one PR per stage to keep risk low and review clear.
 
-## 8. Backward compatibility
+### PR 1 — Omni API + telemetry
 
-- `Arcade_ManageToolAuthorization` remains for per-tool repair and as the
-  underlying mechanism. `Arcade_Apps` is the new, preferred surface.
-- Plugin: keep `/arcade:auth` as a hidden alias of `/arcade:apps` for one
-  release, then drop it.
+Scope:
+- Add `Arcade_Apps` with `list` and `disconnect`
+- Derive `app_id` dynamically from live `provider_id` values
+- Add PostHog events/properties (`omni_apps_list`, `omni_apps_disconnect`)
 
-## 9. Open questions
+Required checks before merge:
+- Unit tests:
+  - list returns expected app grouping/counts
+  - disconnect removes matching connections and is idempotent
+  - unknown/stale app_id returns `app_id_not_found`
+- Analytics tests:
+  - both events emitted on success/error
+  - required properties present
+  - no sensitive fields logged
 
-1. **Partial connection UX:** how to present an app that's connected but missing
-   a permission a task needs (upgrade-in-place vs. reconnect)? The list reflects
-   granted scopes only; the gap is detected at tool-use time.
-2. **Connect scope bundle:** app-level `connect` drives a representative
-   `connect_tool`, so it requests *that tool's* scopes. Is one representative tool
-   enough to feel "connected," or should `connect` pre-warm a broader baseline
-   (which only a provider-level authorize endpoint, §5.3, would do cleanly)?
-3. **`connect_tool` maintenance:** the representative tool per app is hand-picked.
-   Worth a tiny validation/test that each `connect_tool` exists in the live
-   catalog so it never regresses to a 404.
-4. **Icons/branding** for an eventual visual picker (out of scope for MCP text,
-   relevant for dashboards).
+### PR 2 — Plugin commands/copy
 
-> Resolved by the code review: there is **no need for a net-new Engine
-> list/revoke endpoint** (both exist and Omni already calls them), and **account
-> identity is already available** via `provider_user_info`. Earlier drafts listed
-> these as open dependencies.
+Scope:
+- Introduce `apps` command
+- Keep `auth` alias for one release
+- Update command/skill/agent text to apps language
+- Update README + changelog
+
+Required checks before merge:
+- Plugin load sanity:
+  - commands visible as `do`, `apps`, `tools` (plus temporary alias)
+- Manual command run:
+  - `/arcade:apps`
+  - `/arcade:apps disconnect <app_id>`
+
+### PR 3 — Alias removal (scheduled)
+
+Scope:
+- Remove `auth` alias after one release window
+- Remove any leftover auth-first docs/copy
+
+Gate:
+- Confirm low/zero alias usage in PostHog before merge.
+
+## 12. Deploy plan
+
+### 12.1 Omni deploy
+
+1. Deploy PR 1 to staging.
+2. Smoke test staging:
+   - `Arcade_Apps(list)` for a known user returns apps list in one call.
+   - `Arcade_Apps(disconnect)` removes connections for one app_id.
+   - Invalid/stale `app_id` returns `app_id_not_found`.
+3. Verify telemetry in PostHog:
+   - events present
+   - required properties populated
+   - no sensitive data fields.
+4. Promote to production.
+
+### 12.2 Plugin deploy
+
+1. Merge PR 2.
+2. Publish/update plugin package (marketplace path and zip artifact if used).
+3. Verify install/upgrade flow:
+   - new install shows `do`, `apps`, `tools`
+   - existing install receives update and still supports temporary `auth` alias.
+
+## 13. Post-deploy verification (must pass)
+
+### Functional
+
+- `apps` list:
+  - returns quickly
+  - no probing of many tools
+  - no `404 tools not found` caused by guessed tool names
+- `apps disconnect`:
+  - first run disconnects
+  - second run is safe/idempotent
+- old alias:
+  - `auth` works during migration window
+  - logs usage for removal decision
+
+### Analytics
+
+- `omni_apps_list` appears for every list invocation.
+- `omni_apps_disconnect` appears for every disconnect invocation.
+- Error cases populate `error_code`, `error_class`, `engine_status_code`.
+- `duration_ms` is set for both events.
+- No auth URLs, token values, or raw account identifiers are present.
+
+### UX/copy
+
+- User-facing responses consistently use apps language.
+- Internal plumbing terms do not appear in normal user answers.
+
+## 14. Definition of done
+
+All of the following are true:
+
+1. PR 1 and PR 2 are deployed to production.
+2. Acceptance criteria in §8 are all met.
+3. Post-deploy verification in §13 passes.
+4. Docs are updated per §10.
+5. A dated follow-up issue is filed for PR 3 alias removal.

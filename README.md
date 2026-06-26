@@ -35,7 +35,8 @@ claude mcp add --transport http arcade https://omni.arcade.dev/mcp
 ```
 
 Once installed, try `/arcade:do summarize my unread email`, or just ask in plain
-language — the `arcade-operator` subagent kicks in automatically.
+language — the `arcade-operator` subagent kicks in automatically. Use
+`/arcade:apps` to see or disconnect your connected apps.
 
 ## Claude Desktop
 
@@ -71,9 +72,9 @@ One plugin, three client targets, sharing the same MCP connection:
 | `.claude-plugin/` | Claude Code | Plugin + marketplace manifest |
 | `mcp.json` / `.mcp.json` | Cursor / Claude Code | The Omni MCP server connection |
 | `agents/` | Claude Code | Subagents that run the discovery loop in isolation |
-| `skills/` | Cursor + Claude Code | Auto-activating guidance for tool use & auth |
-| `commands/` | Claude Code | `/arcade:do`, `/arcade:tools`, `/arcade:auth` slash commands |
-| `hooks/` | Claude Code | Session-start priming + auth-link surfacing |
+| `skills/` | Cursor + Claude Code | Auto-activating guidance for tool use & apps |
+| `commands/` | Claude Code | `/arcade:do`, `/arcade:apps`, `/arcade:tools` slash commands |
+| `hooks/` | Claude Code | Session-start priming |
 | `rules/` | Cursor | Tool-discovery rule |
 | `clients/claude-desktop/` | Claude Desktop | Ready-to-merge connector config |
 

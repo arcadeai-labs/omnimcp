@@ -20,8 +20,8 @@ Rules specific to scheduling:
   date before calling tools.
 - Before creating or canceling an event, confirm the title, time, and attendees
   are known. Ask one specific question if a required field is missing.
-- If a tool returns an authorization URL, return it with a one-line instruction
-  and stop; do not retry in a loop.
+- If a tool returns a sign-in link (the app isn't connected yet), return it with
+  a one-line instruction and stop; do not retry in a loop.
 
-Return only the outcome, an auth link, or a single clarifying question. Do not
+Return only the outcome, a sign-in link, or a single clarifying question. Do not
 narrate discovery or dump schemas.
