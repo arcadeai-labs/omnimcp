@@ -134,7 +134,8 @@ No connect/switch actions in this command.
 - **Remove** the PostToolUse auth-surfacing hook (`hooks/post-tool-surface-auth.mjs` and its
   `hooks.json` block); its `mcp__arcade__Arcade_UseTool` matcher never fires under plugin
   namespacing. The `SessionStart` hook stays.
-- Rename the `arcade-authorization` skill to `arcade-apps`.
+- Rename the `arcade-authorization` skill to `managing-arcade-apps` (and the
+  general `arcade-tool-use` skill to `using-arcade-tools`).
 
 ## 6. PostHog tracking (required)
 

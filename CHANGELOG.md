@@ -7,10 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **`/arcade:apps` command** and **`arcade-apps` skill** for managing connected
-  apps: list the apps Arcade can act on (with the account each is connected as)
-  and disconnect one. Backed by the new `Arcade_Apps` MCP tool on the Omni
-  server (`list` + `disconnect`).
+- **`/arcade:apps` command** and **`managing-arcade-apps` skill** for managing
+  connected apps: list the apps Arcade can act on (with the account each is
+  connected as) and disconnect one. Backed by the new `Arcade_Apps` MCP tool on
+  the Omni server (`list` + `disconnect`).
 
 ### Changed
 
@@ -25,7 +25,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **PostToolUse auth-surfacing hook** (`hooks/post-tool-surface-auth.mjs` + its
   `hooks.json` block) — its `mcp__arcade__Arcade_UseTool` matcher never fired
   under plugin MCP namespacing. The `SessionStart` hook is unchanged.
-- **`arcade-authorization` skill** — replaced by `arcade-apps`.
+- **`arcade-authorization` skill** — replaced by `managing-arcade-apps`; the
+  general guidance skill was renamed `arcade-tool-use` -> `using-arcade-tools`.
 
 > Requires reinstalling the plugin to pick up the new command set
 > (`/plugin marketplace update arcade` then reinstall). The `/arcade:apps`
