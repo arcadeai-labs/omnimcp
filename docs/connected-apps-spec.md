@@ -17,6 +17,10 @@ guesses a representative tool per provider and probes
 couldn't disconnect anything. This spec replaces that with a first-class
 **Apps** concept.
 
+Good news from the code review: the **Engine primitives already exist and Omni
+already calls them** (list connections + delete connection — see §5.2). The work
+is almost entirely a new MCP surface + presentation, not backend plumbing.
+
 ## 2. Principles
 
 1. **Users think in "apps," not plumbing.** The end user must never see the
@@ -64,29 +68,44 @@ couldn't disconnect anything. This spec replaces that with a first-class
 ```
 
 Notes:
-- `connected` is app-level (any auth present). Because Arcade grants permissions
-  incrementally (per tool, as used), an app can be connected but missing some
-  permissions — hence per-permission `granted`.
+- `connected` is app-level: true when the user has a connection with an active
+  `connection_status` for any provider backing the app.
+- `permissions` are the **scopes currently granted** on the connection
+  (`UserConnection.scopes`), humanized. Arcade grants scopes incrementally (per
+  tool, as used), so this reflects what's granted *now*. A task that needs a
+  not-yet-granted permission surfaces at tool-use time via the requirements
+  check (and triggers a "connect/upgrade" prompt) — it is not pre-computed in the
+  list. `granted` is therefore `true` for everything `list` returns; it exists in
+  the schema for forward-compat with a future "available but not granted" view.
+- `account` comes from `UserConnection.provider_user_info`, already safe-filtered
+  by Omni to `email`/`login`/`name`/`username` (`safeProviderUserInfo`).
 - One app may be backed by **multiple providers/toolkits** (e.g. Microsoft →
-  Outlook, OneDrive, SharePoint, Outlook Calendar). The catalog (4.2) rolls
-  these up.
+  Outlook, OneDrive, SharePoint, Outlook Calendar). In practice these share one
+  provider (`omni-microsoft`); the catalog (4.2) rolls them up by `provider_id`.
 
 ### 4.2 App catalog (Omni-owned)
 
-A static mapping Omni maintains, aligned with the registered `omni-*` providers
-and the tool allowlist:
+A static overlay Omni maintains. `app_id` is the `provider_id` with the `omni-`
+prefix stripped (`omni-google` → `google`). `connect_tool` is the representative
+tool used to drive app-level `connect` (see §5.3):
 
 ```jsonc
 {
-  "google":    { "name": "Google",    "providers": ["omni-google"],    "services": ["Gmail","Calendar","Drive","Docs"] },
-  "github":    { "name": "GitHub",    "providers": ["omni-github"],    "services": ["GitHub"] },
-  "slack":     { "name": "Slack",     "providers": ["omni-slack"],     "services": ["Slack"] },
-  "linear":    { "name": "Linear",    "providers": ["omni-linear"],    "services": ["Linear"] },
-  "notion":    { "name": "Notion",    "providers": ["omni-notion"],    "services": ["Notion"] },
-  "asana":     { "name": "Asana",     "providers": ["omni-asana"],     "services": ["Asana"] },
-  "microsoft": { "name": "Microsoft", "providers": ["omni-microsoft"], "services": ["Outlook","OneDrive","SharePoint","Outlook Calendar"] }
+  "google":    { "name": "Google",    "providers": ["omni-google"],    "services": ["Gmail","Calendar","Drive","Docs"], "connect_tool": "Gmail_WhoAmI" },
+  "github":    { "name": "GitHub",    "providers": ["omni-github"],    "services": ["GitHub"],                         "connect_tool": "GitHub_WhoAmI" },
+  "slack":     { "name": "Slack",     "providers": ["omni-slack"],     "services": ["Slack"],                          "connect_tool": "Slack_ListConversations" },
+  "linear":    { "name": "Linear",    "providers": ["omni-linear"],    "services": ["Linear"],                         "connect_tool": "Linear_ListIssues" },
+  "notion":    { "name": "Notion",    "providers": ["omni-notion"],    "services": ["Notion"],                         "connect_tool": "NotionToolkit_WhoAmI" },
+  "asana":     { "name": "Asana",     "providers": ["omni-asana"],     "services": ["Asana"],                          "connect_tool": "Asana_ListWorkspaces" },
+  "microsoft": { "name": "Microsoft", "providers": ["omni-microsoft"], "services": ["Outlook","OneDrive","SharePoint","Outlook Calendar"], "connect_tool": "MicrosoftOnedrive_WhoAmI" }
 }
 ```
+
+The provider list and `app_id`s can be derived automatically from the allowlist +
+tool requirements (§5.5); this static table only adds display names, the human
+"services" grouping, and the `connect_tool`. Pick each `connect_tool` from a tool
+known to exist in the catalog (the reference session's `*_WhoAmI` calls confirm
+several) so `connect` never 404s.
 
 ### 4.3 Permission humanization
 
@@ -125,30 +144,70 @@ Design rules:
 - All responses use the App model in §4.1 (humanized permissions, friendly
   names). No raw scopes/provider ids in the user-visible fields (keep raw values
   in an optional `_debug` block if useful for the model).
-- `connect` requests the app's baseline permission bundle from the catalog so a
-  first connect is useful without needing a specific tool call first.
+- `connect` drives the catalog's representative `connect_tool` for the app
+  (§5.3), so a first connect works without the user naming a specific tool.
 
-### 5.2 Engine dependencies
+### 5.2 How each action maps to today's Engine API
 
-`Arcade_Apps` is a thin roll-up over Engine capabilities:
+**list, disconnect, and switch_account need no new Engine endpoints.** Omni
+already calls all of them today in the `reauthorize`/`switch_account` path of
+`Arcade_ManageToolAuthorization` (`internal/tools/manage_tool_authorization.go`
+→ `resetAndAuthorize`). The typed methods already exist in
+`internal/engine/client.go`; `Arcade_Apps` just re-shapes them around apps.
 
-1. **List authorizations for a user** → provider_id, scopes, status, account
-   identity, timestamps. (Likely exists internally; expose to Omni.)
-2. **Revoke/delete an authorization** by (user, provider) → required for
-   `disconnect`. **This is the main net-new backend capability.**
-3. **Account identity per authorization** (email/login) for the "Connected as"
-   field. If not stored, derive via a cached `*_WhoAmI` call.
+| Apps action | Existing Engine call(s) | Omni client method (exists today) |
+|---|---|---|
+| `list` | `GET /v1/admin/user_connections?user_id=<verified-user>` (omit `provider_id` → every app) | `ListUserConnections(userID, "")` |
+| `disconnect` | `GET /v1/admin/user_connections?...&provider_id=` then `DELETE /v1/admin/user_connections/{id}` per connection | `ListUserConnections` + `DeleteUserConnection` |
+| `switch_account` | delete connections + `POST /v1/tools/authorize` | already implemented as `resetAndAuthorize` |
+| `connect` | `POST /v1/tools/authorize` for a representative tool of the app | `AuthorizeTool` |
 
-Omni adds on top: the app catalog (§4.2), scope humanization (§4.3), and the
-provider→app roll-up.
+Each `UserConnection` already carries everything the App model needs:
+`provider_id`, `scopes`, `connection_status`, and `provider_user_info`
+(→ "Connected as"). So `Arcade_Apps(list)` is **one** `ListUserConnections` call,
+grouped by `provider_id` and overlaid with the catalog — replacing the 14-call,
+3×404 probing session entirely.
 
-### 5.3 Phasing
+`GET/DELETE /v1/admin/user_connections` require **admin auth**, which Omni already
+uses via its project API key (`doJSON(..., admin=true)`).
 
-- **Phase 1 (no Engine revoke yet):** ship `Arcade_Apps(list, connect)` using the
-  existing list-authorizations + authorize flow. Immediately kills the
-  guessing/N+1 problem and gives a real "Apps" list + sign-in.
-- **Phase 2:** add Engine revoke → enables `disconnect` and `switch_account`
-  (true logout).
+### 5.3 The only real gap: app-level connect
+
+Authorization is **tool-centric** — `POST /v1/tools/authorize` takes a `tool_name`,
+and there is no provider-level "authorize this app with its baseline scopes"
+endpoint. So `connect(app_id)` must pick a representative tool whose auth covers
+the app's baseline scopes and call `AuthorizeTool`. The catalog (§4.2) supplies a
+`connect_tool` per app (e.g. a low-scope read or `*_WhoAmI`).
+
+Optional future Engine work: a provider-level authorize endpoint
+(`POST /v1/auth/authorize { provider_id, scopes }`) so `connect` doesn't lean on a
+representative tool. **Not required for v1.**
+
+### 5.4 Security
+
+`list`/`disconnect` use the admin API key and take a `user_id`. Omni MUST pass the
+**verified** Arcade user id from the MCP request identity (the same one it binds
+for tool execution) and never a caller-supplied value — otherwise a caller could
+enumerate or delete another user's connections.
+
+### 5.5 Catalog source
+
+Derive the catalog from the **allowlist** (`tools.allowed_tools` /
+`OMNI_TOOLS_ALLOWED`) plus each tool's `provider_id` (from the tool spec /
+`/v1/tools/requirements`): group allowed toolkits by `provider_id`, strip the
+`omni-` prefix for `app_id` (`omni-google` → `google`), and overlay a small static
+table for display names, the human "services" list, and the `connect_tool`. The
+catalog is also what lets `list` show **not-connected** apps — the admin endpoint
+only returns connections that already exist.
+
+### 5.6 Phasing
+
+- **Phase 1 (no Engine changes):** `Arcade_Apps(list, disconnect, switch_account)`
+  on the endpoints Omni already calls, plus `connect` via a representative tool
+  from the catalog. This already delivers the full see / connect / disconnect /
+  switch experience and removes the probing/404s.
+- **Phase 2 (optional polish):** provider-level authorize endpoint for cleaner
+  `connect`; richer permission metadata if Engine adds it.
 
 ## 6. Plugin (`arcade`) changes
 
@@ -225,10 +284,19 @@ All user-facing names move from "auth/authorization" to **apps**.
 ## 9. Open questions
 
 1. **Partial connection UX:** how to present an app that's connected but missing
-   a permission a task needs (upgrade-in-place vs. reconnect)?
-2. **Connect scope bundle:** does app-level `connect` request a baseline set, or
-   stay lazy (per-tool) and only pre-warm common permissions?
-3. **Account identity source:** stored on the authorization vs. derived via
-   `*_WhoAmI`? (Affects whether `list` is fully self-contained.)
+   a permission a task needs (upgrade-in-place vs. reconnect)? The list reflects
+   granted scopes only; the gap is detected at tool-use time.
+2. **Connect scope bundle:** app-level `connect` drives a representative
+   `connect_tool`, so it requests *that tool's* scopes. Is one representative tool
+   enough to feel "connected," or should `connect` pre-warm a broader baseline
+   (which only a provider-level authorize endpoint, §5.3, would do cleanly)?
+3. **`connect_tool` maintenance:** the representative tool per app is hand-picked.
+   Worth a tiny validation/test that each `connect_tool` exists in the live
+   catalog so it never regresses to a 404.
 4. **Icons/branding** for an eventual visual picker (out of scope for MCP text,
    relevant for dashboards).
+
+> Resolved by the code review: there is **no need for a net-new Engine
+> list/revoke endpoint** (both exist and Omni already calls them), and **account
+> identity is already available** via `provider_user_info`. Earlier drafts listed
+> these as open dependencies.
