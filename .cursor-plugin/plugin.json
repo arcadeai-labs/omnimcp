@@ -2,7 +2,7 @@
     "name": "arcade",
     "displayName": "OmniMCP by Arcade.dev",
     "description": "OmniMCP provides agents access to services like Slack, Gmail, GitHub, Linear, Notion, Dropbox, and other similar services.",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "author": {
         "name": "Arcade.dev",
         "email": "support@arcade.dev"

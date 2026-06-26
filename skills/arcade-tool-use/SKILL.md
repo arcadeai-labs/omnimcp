@@ -26,14 +26,14 @@ discovery noise stays out of the main conversation:
 2. `Arcade_UseTool(tool_name, inputs, query_id)` — execute. Use `tool_name`
    exactly as returned: `Toolkit_Action` form, **no** `@version` suffix, **no**
    period. Pass the originating `query_id`.
-3. `Arcade_ManageToolAuthorization` — only for explicit requests to reconnect a
-   provider, switch accounts, or fix scopes (see the `arcade-authorization` skill).
+3. `Arcade_Apps` — to see or disconnect the user's connected apps (see the
+   `arcade-apps` skill).
 
 ## Behavior
 
 - Don't narrate discovery ("let me search for a tool…"). Deliver the outcome.
 - Don't dump schemas or present a list of tools for the user to pick from.
-- A tool that needs OAuth returns an authorization link — present it to the
-  user, then retry once they confirm. Never loop on auth.
+- A tool that needs an app the user hasn't connected returns a one-time sign-in
+  link — present it, then retry once they confirm. Never loop.
 - Prompt only when a genuinely required input is missing (which channel, which
   repo, which recipient).

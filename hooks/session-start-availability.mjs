@@ -9,9 +9,10 @@ try {
     "a single MCP connection. For ANY task involving an external service, prefer",
     "delegating to a subagent so discovery stays out of the main context:",
     "arcade-operator (general), inbox-agent (email), schedule-agent (calendar).",
-    "If a tool returns an authorization link, present it to the user and retry",
-    "after they approve — never loop on auth. If the arcade MCP server is not",
-    "connected yet, tell the user to run /mcp and authenticate with Arcade.",
+    "If a task needs an app the user hasn't connected, a tool returns a one-time",
+    "sign-in link; present it and retry after they confirm — never loop. To see or",
+    "disconnect connected apps, use /arcade:apps. If the arcade MCP server is not",
+    "connected yet, tell the user to run /mcp and sign in with Arcade.",
   ].join(" ");
 
   process.stdout.write(
