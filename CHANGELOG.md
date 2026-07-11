@@ -5,6 +5,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.6.0] - 2026-07-10
 
+### Added
+
+- **Checks and CI.** `scripts/check.mjs` validates JSON, frontmatter, manifest
+  path references, duplicate component names, version/endpoint consistency,
+  hook output shapes, and language rules; `scripts/opencode-smoke.ts` exercises
+  the OpenCode plugin's config registration and toast scoping. Both run in a
+  GitHub Actions workflow on every push/PR, plus `npm pack --dry-run`. `QA.md`
+  documents the manual release checklist (local loads + auth-flow scenarios).
+
 ### Changed
 
 - **Explicit layout.** Shared components moved to `components/` (skills, agent,
