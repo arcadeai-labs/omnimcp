@@ -7,7 +7,13 @@ want; Arcade picks the right tool and handles the app sign-in.
 
 ## Install
 
-Add it to your `opencode.json` (`plugin` array):
+One command:
+
+```bash
+opencode plugin opencode-arcade
+```
+
+Or add it to your `opencode.json` (`plugin` array) yourself:
 
 ```json
 {
@@ -34,11 +40,13 @@ Prefer configuring the MCP server yourself instead of using the plugin? Add:
 
 ## What you get
 
-Three meta-tools that resolve to the full Arcade catalog on demand:
+Four meta-tools that resolve to the full Arcade catalog on demand:
 
 - `Arcade_SelectTools` — find the right tool for a task
 - `Arcade_UseTool` — run it
 - `Arcade_Apps` — see or disconnect your connected apps
+- `Arcade_ManageToolAuthorization` — fix an app connection (switch account,
+  expired sign-in, missing permissions)
 
 ## Links
 

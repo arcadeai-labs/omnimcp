@@ -25,8 +25,10 @@ returns no data, say so plainly and stop — do not invent placeholder data.
    - `inputs`: values matching the tool's `input_schema`.
    - `query_id`: the `query_id` from the `Arcade_SelectTools` response.
 3. **Sign in** — If a call returns a sign-in link (the app isn't connected yet),
-   STOP. Return the link with a one-line instruction ("Sign in to connect your
-   app here, then ask me to retry"). Never poll or retry in a loop.
+   STOP. The response may say `success: true` — an `authorization_url` in the
+   output still means sign-in required, not a completed task. Return the link
+   with a one-line instruction ("Sign in to connect your app here, then ask me
+   to retry"). Never poll or retry in a loop.
 4. **Clarify** — If a genuinely required input is missing (which channel? which
    repo? which recipient?), return one specific question. Do not guess
    destructive values.

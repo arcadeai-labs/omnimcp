@@ -54,12 +54,21 @@ Reply: "Posted to #eng."
 ## Signing in to apps
 
 The first time a task needs an app the user hasn't connected, the tool returns
-a one-time sign-in link instead of a result:
+a one-time sign-in link instead of a result. **The response may say
+`success: true` — an `authorization_url` (or authorization-required status) in
+the output still means sign-in required, not a completed task.**
 
 1. Present the link: "Sign in to connect your **<App>** here, then tell me to
    continue."
 2. Stop and wait for the user — never poll or retry in a loop.
 3. After they confirm, retry the same `Arcade_UseTool` call once.
+
+## Outbound and irreversible actions
+
+Confirm with the user before sending email or messages, deleting, cancelling,
+overwriting, or publishing anything. Never guess recipients, destinations, or
+destructive parameter values. For calendar changes, resolve relative dates
+against the current date and state times with their timezone.
 
 ## Errors
 

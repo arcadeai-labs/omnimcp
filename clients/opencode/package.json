@@ -1,9 +1,12 @@
 {
   "name": "opencode-arcade",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "description": "Arcade (OmniMCP) for OpenCode — 500+ external-service tools (Slack, Gmail, GitHub, Calendar, Notion, Linear, and more) over one MCP connection.",
   "type": "module",
   "main": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
   "license": "Apache-2.0",
   "author": "Arcade.dev (https://arcade.dev)",
   "homepage": "https://omni.arcade.dev",
@@ -33,6 +36,6 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@opencode-ai/plugin": "latest"
+    "@opencode-ai/plugin": "^1.17.18"
   }
 }
