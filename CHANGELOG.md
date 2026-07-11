@@ -3,6 +3,28 @@
 All notable changes to the OmniMCP plugin are documented here. This project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-10
+
+### Changed
+
+- **Reliability pass over skills and the Cursor rule**, following skill-authoring
+  best practices (Anthropic's guide, the agentskills.io spec, OpenAI's Codex
+  skills docs): trigger keywords front-loaded in descriptions, an explicit
+  "reach for Arcade first" preference over built-in web search / CLI / direct
+  API calls, "when not to use" sections, worked input→output examples, a
+  defined error policy (fix inputs and retry once, otherwise report the error
+  verbatim; never fabricate), and the `arcade` MCP server named explicitly.
+  The Cursor rule and Claude skills now use identical wording where they
+  overlap.
+
+### Removed
+
+- **`inbox-agent` and `schedule-agent` subagents.** Their descriptions fully
+  overlapped with `arcade-operator` (which also names Gmail and Google
+  Calendar), so they were rarely selected; their domain rules (confirm before
+  sending email, resolve relative dates and confirm before changing events)
+  moved into `arcade-operator`. One agent, one command, two skills.
+
 ## [0.4.0] - 2026-06-26
 
 ### Added

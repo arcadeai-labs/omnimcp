@@ -55,7 +55,7 @@ Plugins work in **Cowork** and **Code** (not plain Chat).
 2. Enter `arcadeai-labs/omnimcp` (or `https://github.com/arcadeai-labs/omnimcp`).
 3. **Install** the **arcade** plugin and sign in with Arcade when prompted.
 
-You get the same commands, skills, and subagents as Claude Code.
+You get the same commands, skills, and operator subagent as Claude Code.
 
 For plain **Chat** (which doesn't use plugins), connect the server directly:
 **Settings → Connectors → Add custom connector** → paste
@@ -114,7 +114,7 @@ One package, four client targets, sharing the same MCP connection:
 | `.cursor-plugin/` | Cursor | Plugin + marketplace manifest |
 | `.claude-plugin/` | Claude Code | Plugin + marketplace manifest |
 | `mcp.json` / `.mcp.json` | Cursor / Claude Code | The Omni MCP server connection |
-| `agents/` | Claude Code / Cowork | Subagents that run the discovery loop in isolation |
+| `agents/` | Claude Code / Cowork | The `arcade-operator` subagent that runs the discovery loop in isolation |
 | `skills/` | Cursor + Claude Code / Cowork | Auto-activating guidance for tool use & apps |
 | `commands/` | Claude Code / Cowork | `/arcade:do`, `/arcade:apps`, `/arcade:tools` slash commands |
 | `hooks/` | Claude Code / Cowork | Session-start priming |

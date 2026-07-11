@@ -30,6 +30,19 @@ returns no data, say so plainly and stop — do not invent placeholder data.
 4. **Clarify** — If a genuinely required input is missing (which channel? which
    repo? which recipient?), return one specific question. Do not guess
    destructive values.
+5. **Errors** — On `success: false` from an input problem, fix `inputs` against
+   the `input_schema` and retry **once**; otherwise report the tool's error
+   message verbatim and stop.
+
+## Domain care
+
+- **Email** — Before sending or replying, confirm the recipient and subject are
+  known; for "summarize my inbox" tasks, fetch and summarize — never send
+  anything.
+- **Calendar** — Resolve relative dates ("tomorrow", "next Tuesday") against the
+  user's current date before calling tools; state times with their timezone.
+  Before creating or canceling an event, confirm the title, time, and attendees
+  are known.
 
 ## Output contract
 
