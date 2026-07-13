@@ -1,7 +1,7 @@
 {
   "name": "arcade",
   "description": "Dynamic tool discovery and execution across 500+ Arcade tools (Slack, Gmail, GitHub, Google Calendar, Notion, Linear, Dropbox, and more) over a single MCP connection. Ships an operator subagent, skills, and slash commands so the discovery loop stays out of your main conversation.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": {
     "name": "Arcade.dev",
     "url": "https://omni.arcade.dev"
@@ -26,11 +26,14 @@
     "automation"
   ],
   "commands": [
-    "./commands/do.md",
-    "./commands/apps.md",
-    "./commands/tools.md"
+    "./components/commands/do.md",
+    "./components/commands/apps.md",
+    "./components/commands/tools.md"
   ],
   "agents": [
-    "./agents/arcade-operator.md"
-  ]
+    "./components/agents/arcade-operator.md"
+  ],
+  "skills": "./components/skills/",
+  "hooks": "./clients/claude/hooks/hooks.json",
+  "mcpServers": "./clients/claude/mcp.json"
 }

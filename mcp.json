@@ -1,9 +1,0 @@
-{
-    "mcpServers": {
-        "arcade": {
-            "type": "http",
-            "url": "https://omni.arcade.dev/mcp",
-            "note": "Hosted OmniMCP by Arcade.dev MCP server. Uses OAuth (RFC 9728 Protected Resource Metadata) — on first connection Cursor will prompt you to authorize with Arcade. After sign-in, the agent discovers tools via Arcade_SelectTools and runs them via Arcade_UseTool. Individual tools that need a provider (Google, GitHub, Slack, ...) return a one-time authorization link the first time they run."
-        }
-    }
-}

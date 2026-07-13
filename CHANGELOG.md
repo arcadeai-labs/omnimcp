@@ -3,6 +3,50 @@
 All notable changes to the OmniMCP plugin are documented here. This project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-10
+
+### Added
+
+- **Checks and CI.** `scripts/check.mjs` validates JSON, frontmatter, manifest
+  path references, duplicate component names, version/endpoint consistency,
+  hook output shapes, and language rules; `scripts/opencode-smoke.ts` exercises
+  the OpenCode plugin's config registration and toast scoping. Both run in a
+  GitHub Actions workflow on every push/PR, plus `npm pack --dry-run`. `QA.md`
+  documents the manual release checklist (local loads + auth-flow scenarios).
+
+### Changed
+
+- **Explicit layout.** Shared components moved to `components/` (skills, agent,
+  commands) and client adapters to `clients/{cursor,claude,claude-desktop,opencode}/`.
+  Both plugin manifests now declare every component path explicitly — nothing
+  loads by folder convention, so each client gets exactly its intended bundle.
+- **Client-native hooks.** Cursor gets its own `sessionStart` hook
+  (Cursor-native flat schema) instead of silently ingesting the Claude hook;
+  the Claude `SessionStart` hook is unchanged in shape. Both hooks trimmed to a
+  two-sentence context; detailed behavior lives in the skills.
+- **Sign-in correctness.** Rule, skills, and subagent now state explicitly that
+  an `authorization_url` in a tool result means sign-in required **even when
+  the response says `success: true`** — present the link, stop, wait, retry
+  once.
+- **App connection repair.** `managing-arcade-apps` and `/arcade:apps` now
+  document fixing connections via `Arcade_ManageToolAuthorization`
+  (status / switch account / sign in again) with apps language.
+- **Action safety in the direct path.** Confirm-before-send/delete/cancel/
+  overwrite/publish guidance moved into the shared skill and Cursor rule, not
+  just the `arcade-operator` subagent.
+- **OpenCode hardening** (`opencode-arcade@0.6.0`): `@opencode-ai/plugin`
+  pinned (`^1.17.18`), package `exports` added, and the sign-in toast is now
+  scoped to Arcade tool executions with structured `authorization_url` parsing
+  (regex is a fallback only) — unrelated OAuth-looking URLs no longer toast.
+- **Truthful docs.** Cursor deeplink labeled tools-only with the full plugin
+  path documented separately; four meta-tools documented (including
+  `Arcade_ManageToolAuthorization`); OpenCode npm publication status corrected;
+  `mcp-remote` pinned for Claude Desktop; privacy note added; remaining
+  "authorization link" copy renamed to "sign-in link".
+
+> Claude Code/Cowork users: run `/plugin marketplace update arcade`, then
+> reinstall/update the `arcade` plugin to pick up the new layout.
+
 ## [0.5.0] - 2026-07-10
 
 ### Changed

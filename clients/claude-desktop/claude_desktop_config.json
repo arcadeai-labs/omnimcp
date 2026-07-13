@@ -2,7 +2,7 @@
   "mcpServers": {
     "arcade": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://omni.arcade.dev/mcp"]
+      "args": ["-y", "mcp-remote@0.1.38", "https://omni.arcade.dev/mcp"]
     }
   }
 }
