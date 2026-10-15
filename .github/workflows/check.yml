@@ -2,27 +2,122 @@ name: check
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
 
 jobs:
+  # One job per step of `npm run verify`, so each client's check reports on
+  # its own and one failure doesn't skip the rest.
+  verify:
+    name: ${{ matrix.script }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        script: [test, "verify:claude", "verify:cursor", "verify:codex", "verify:copilot"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install dev dependencies
+        run: npm ci
+
+      - run: npm run ${{ matrix.script }}
+
+  # Branch protection on main requires a check named `check`, so the job that
+  # waits for every other job carries that name.
   check:
     runs-on: ubuntu-latest
+    if: >-
+      always() &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    needs: [verify]
+    timeout-minutes: 20
+    permissions:
+      checks: read
     steps:
-      - uses: actions/checkout@v4
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Require Cursor Bugbot on pull requests
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
 
-      - name: Structural checks
-        run: node scripts/check.mjs
+          sha="${HEAD_SHA}"
+          repo="${REPO}"
+          deadline=$(( $(date +%s) + 900 ))
 
-      - uses: oven-sh/setup-bun@v2
+          while [ "$(date +%s)" -lt "$deadline" ]; do
+            bugbot_json="$(
+              gh api "repos/${repo}/commits/${sha}/check-runs" --paginate |
+                jq -s '[.[].check_runs[] | select(.name=="Cursor Bugbot" and .app.slug=="cursor")] | sort_by(.started_at) | last'
+            )"
+            status="$(printf '%s' "${bugbot_json}" | jq -r '.status // ""')"
+            conclusion="$(printf '%s' "${bugbot_json}" | jq -r '.conclusion // ""')"
+            summary="$(printf '%s' "${bugbot_json}" | jq -r '.output.summary // ""')"
 
-      - name: OpenCode plugin smoke test
-        run: bun scripts/opencode-smoke.ts
+            if [ -z "${status}" ]; then
+              echo "Waiting for Cursor Bugbot check to appear..."
+              sleep 15
+              continue
+            fi
 
-      - name: OpenCode package contents
-        working-directory: clients/opencode
-        run: npm pack --dry-run
+            if [ "${status}" != "completed" ]; then
+              echo "Cursor Bugbot status: ${status}"
+              sleep 15
+              continue
+            fi
+
+            case "${conclusion}" in
+              success)
+                echo "Cursor Bugbot passed"
+                exit 0
+                ;;
+              neutral)
+                if printf '%s' "${summary}" | grep -qi 'cancelled because a new commit was pushed'; then
+                  echo "Cursor Bugbot cancelled by a push race; waiting for a fresh run..."
+                  sleep 15
+                  continue
+                fi
+                if printf '%s' "${summary}" | grep -qi 'no issues found'; then
+                  echo "Cursor Bugbot completed with no issues"
+                  exit 0
+                fi
+                echo "Cursor Bugbot returned neutral (findings or incomplete review)"
+                exit 1
+                ;;
+              failure|cancelled|timed_out|action_required)
+                echo "Cursor Bugbot failed: ${conclusion}"
+                exit 1
+                ;;
+              skipped)
+                echo "Cursor Bugbot was skipped"
+                exit 1
+                ;;
+              *)
+                echo "Cursor Bugbot returned unexpected conclusion: ${conclusion}"
+                exit 1
+                ;;
+            esac
+          done
+
+          echo "Timed out waiting for Cursor Bugbot"
+          exit 1
+
+      - run: echo "All checks passed"

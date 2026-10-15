@@ -1,0 +1,10 @@
+# Written by `npm run generate`. Lists every fully generated file.
+.cursor-plugin/plugin.json linguist-generated=true
+.claude-plugin/plugin.json linguist-generated=true
+.claude-plugin/marketplace.json linguist-generated=true
+clients/cursor/rules/arcade.mdc linguist-generated=true
+.claude-plugin/hooks.json linguist-generated=true
+clients/cursor/hooks/hooks.json linguist-generated=true
+com.github.copilot/hooks/hooks.json linguist-generated=true
+skills/scale-arcade/references/arcade-docs.md linguist-generated=true
+com.github.copilot/agents/arcade-operator.agent.md linguist-generated=true

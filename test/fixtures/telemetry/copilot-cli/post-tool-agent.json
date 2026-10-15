@@ -1,0 +1,24 @@
+{
+  "prelude": [
+    {
+      "hook_event_name": "UserPromptSubmit",
+      "session_id": "dd3beb80-4471-4513-99a4-a57d3d7c08df",
+      "timestamp": "2026-09-24T21:27:02.743Z",
+      "cwd": "/Users/someone/private-repo",
+      "prompt": "What is on my calendar tomorrow?"
+    }
+  ],
+  "input": {
+    "hook_event_name": "PostToolUse",
+    "session_id": "dd3beb80-4471-4513-99a4-a57d3d7c08df",
+    "timestamp": "2026-09-24T21:27:02.743Z",
+    "cwd": "/Users/someone/private-repo",
+    "tool_name": "Agent",
+    "tool_input": { "agent_type": "arcade:arcade-operator" },
+    "tool_result": {
+      "result_type": "success",
+      "text_result_for_llm": "done"
+    }
+  },
+  "expected": null
+}

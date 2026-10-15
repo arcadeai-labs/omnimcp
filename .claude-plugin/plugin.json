@@ -1,39 +1,24 @@
 {
   "name": "arcade",
-  "description": "Dynamic tool discovery and execution across 500+ Arcade tools (Slack, Gmail, GitHub, Google Calendar, Notion, Linear, Dropbox, and more) over a single MCP connection. Ships an operator subagent, skills, and slash commands so the discovery loop stays out of your main conversation.",
-  "version": "0.6.0",
+  "description": "Your agent, every app you've connected. Ask in plain English — email, calendar, issues, chat — and Arcade finds and runs the right tool. Sign in once in the browser — without ever handing your agent a key.",
   "author": {
     "name": "Arcade.dev",
-    "url": "https://omni.arcade.dev"
+    "url": "https://arcade.dev"
   },
-  "homepage": "https://omni.arcade.dev",
-  "repository": "https://github.com/arcadeai-labs/omnimcp",
-  "license": "Apache-2.0",
+  "homepage": "https://arcade.dev",
+  "license": "MIT",
   "keywords": [
     "arcade",
-    "omni",
     "mcp",
-    "tools",
-    "tool-discovery",
-    "agent",
-    "slack",
-    "github",
-    "gmail",
-    "google-calendar",
-    "notion",
-    "linear",
-    "integrations",
-    "automation"
+    "agent-skills",
+    "connected-apps"
   ],
-  "commands": [
-    "./components/commands/do.md",
-    "./components/commands/apps.md",
-    "./components/commands/tools.md"
-  ],
-  "agents": [
-    "./components/agents/arcade-operator.md"
-  ],
-  "skills": "./components/skills/",
-  "hooks": "./clients/claude/hooks/hooks.json",
-  "mcpServers": "./clients/claude/mcp.json"
+  "version": "0.7.0",
+  "hooks": "./.claude-plugin/hooks.json",
+  "mcpServers": {
+    "arcade": {
+      "type": "http",
+      "url": "https://api.arcade.dev/mcp/arcade"
+    }
+  }
 }

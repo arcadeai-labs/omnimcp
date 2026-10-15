@@ -1,0 +1,4 @@
+{
+  "error": "Error POSTing to endpoint http://127.0.0.1:12345/mcp: upstream exploded",
+  "is_interrupt": false
+}

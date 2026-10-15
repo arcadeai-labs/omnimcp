@@ -1,0 +1,17 @@
+{
+  "input": {
+    "hook_event_name": "UserPromptSubmit",
+    "session_id": "57946be7-1a73-40ca-a042-abb0f68d9445",
+    "timestamp": "2026-09-24T21:27:02.743Z",
+    "cwd": "/Users/someone/private-repo",
+    "prompt": "Complete todo listing-arcade-apps"
+  },
+  "expected": {
+    "event": "Plugin prompt submitted",
+    "extra": {
+      "could_use_arcade": false,
+      "service_hints": [],
+      "reminder_sent": false
+    }
+  }
+}

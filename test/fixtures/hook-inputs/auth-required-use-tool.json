@@ -1,0 +1,4 @@
+{
+  "error": "this tool requires authorization. Please visit this URL to authorize: https://example.invalid/oauth/abc",
+  "is_interrupt": false
+}

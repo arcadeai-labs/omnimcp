@@ -1,29 +1,29 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "arcade",
+  "description": "Install Arcade in Claude Desktop, Cowork, Claude Code, and Codex.",
   "owner": {
     "name": "Arcade.dev",
-    "email": "support@arcade.dev"
-  },
-  "metadata": {
-    "description": "Arcade's Omni MCP — dynamic tool discovery and execution across the full Arcade tool catalog."
+    "url": "https://arcade.dev"
   },
   "plugins": [
     {
       "name": "arcade",
+      "displayName": "Arcade",
       "source": "./",
-      "description": "Dynamic tool discovery and execution across 500+ Arcade tools over a single MCP connection, with an operator subagent, skills, slash commands, and hooks.",
+      "description": "Your agent, every app you've connected. Ask in plain English — email, calendar, issues, chat — and Arcade finds and runs the right tool. Sign in once in the browser — without ever handing your agent a key.",
       "author": {
-        "name": "Arcade.dev"
+        "name": "Arcade.dev",
+        "url": "https://arcade.dev"
       },
-      "homepage": "https://omni.arcade.dev",
-      "repository": "https://github.com/arcadeai-labs/omnimcp",
-      "license": "Apache-2.0",
+      "homepage": "https://arcade.dev",
+      "repository": "https://github.com/ArcadeAI/arcade-plugin",
+      "license": "MIT",
       "keywords": [
         "arcade",
-        "omni",
         "mcp",
-        "tool-discovery",
-        "integrations"
+        "agent-skills",
+        "connected-apps"
       ]
     }
   ]
