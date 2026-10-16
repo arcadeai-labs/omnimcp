@@ -31,7 +31,10 @@ const git = (repo, args) => {
   return result.stdout;
 };
 const localTree = (repo, sha) => new Map(git(repo, ["ls-tree", "-r", "-z", sha]).split("\0").filter(Boolean).map((record) => {
-  const [meta, path] = record.split("\t");
+  const separator = record.indexOf("\t");
+  if (separator < 0) throw new Error("malformed Git tree record");
+  const meta = record.slice(0, separator);
+  const path = record.slice(separator + 1);
   const [mode, type, blobSha] = meta.split(" ");
   if (type !== "blob" || !["100644", "100755"].includes(mode)) throw new Error(`unsupported mirror entry ${path}`);
   return [path, { mode, blobSha }];
