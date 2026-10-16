@@ -6,11 +6,20 @@ Canonical commits are not imported.
 
 These canonical paths are intentionally absent:
 
-- `.github/workflows/release-please.yml`
+- `.github/workflows/`
 - `scripts/sync-legacy.mjs`
+- `scripts/legacy-projection.mjs`
+- `scripts/verify-mirror.mjs`
 - `test/sync-legacy.test.mjs`
+- `test/mirror-integrity.test.mjs`
 - `sync/`
 - `docs/migration/`
+
+Destination controls are projected from these canonical templates:
+
+- `sync/destination-check.yml` -> `.github/workflows/check.yml`
+- `scripts/legacy-projection.mjs` -> `.github/legacy-projection.mjs`
+- `scripts/verify-mirror.mjs` -> `.github/verify-mirror.mjs`
 
 This file is destination-only. Sync keeps it and does not replace it.
 
