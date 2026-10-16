@@ -9,14 +9,16 @@
 Each client has its own install; use the one for yours. The per-client guides
 below have alternatives and verification steps.
 
-| Client | Install |
-|---|---|
-| Claude Code | `claude plugin marketplace add ArcadeAI/arcade-plugin`, then `claude plugin install arcade@arcade` |
-| Codex / ChatGPT | `codex plugin marketplace add ArcadeAI/arcade-plugin`, then `codex plugin add arcade@arcade` |
-| Cursor | Individual plans: `git clone https://github.com/ArcadeAI/arcade-plugin ~/.cursor/plugins/local/arcade-plugin`, then reload Cursor. Teams/Enterprise: an admin imports the repo as a team marketplace — see [cursor.md](cursor.md) |
-| VS Code | Command Palette → **Chat: Install Plugin From Source** → `https://github.com/ArcadeAI/arcade-plugin` |
-| GitHub Copilot CLI | `copilot plugin install ArcadeAI/arcade-plugin` |
-| Claude Desktop | Add `ArcadeAI/arcade-plugin` as a plugin marketplace — see [claude-desktop.md](claude-desktop.md) |
+| Client | Install | Instructions |
+|---|---|---|
+| **Cursor** | [![Install in Cursor](https://img.shields.io/badge/Cursor-one--click-000000)](https://cursor.com/install-mcp?name=arcade&config=eyJ1cmwiOiJodHRwczovL2FwaS5hcmNhZGUuZGV2L21jcC9hcmNhZGUifQ==) | [cursor.md](cursor.md) |
+| **Claude Code** | `claude plugin marketplace add ArcadeAI/arcade-plugin`, then `claude plugin install arcade@arcade` | [claude-code.md](claude-code.md) |
+| **Claude Desktop** | Add `ArcadeAI/arcade-plugin` as a plugin marketplace | [claude-desktop.md](claude-desktop.md) |
+| **VS Code** | [![Install in VS Code](https://img.shields.io/badge/VS_Code-one--click-0098FF?logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=arcade&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fapi.arcade.dev%2Fmcp%2Farcade%22%7D) | [vscode.md](vscode.md) |
+| **GitHub Copilot CLI** | `copilot plugin install ArcadeAI/arcade-plugin` | [copilot.md](copilot.md) |
+| **Codex / ChatGPT** | `codex plugin marketplace add ArcadeAI/arcade-plugin`, then `codex plugin add arcade@arcade` | [codex.md](codex.md) |
+| **OpenCode** | Gateway URL only — [opencode.md](opencode.md) | [opencode.md](opencode.md) |
+| **Any MCP client** | `https://api.arcade.dev/mcp/arcade` | [agent-plugins.md](agent-plugins.md) |
 
 After install, reload your agent or start a new session. No API keys: the
 first task that touches an app returns a browser sign-in link.
