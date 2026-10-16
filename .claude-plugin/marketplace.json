@@ -4,7 +4,8 @@
   "description": "Install Arcade in Claude Desktop, Cowork, Claude Code, and Codex.",
   "owner": {
     "name": "Arcade.dev",
-    "url": "https://arcade.dev"
+    "url": "https://arcade.dev",
+    "email": "support@arcade.dev"
   },
   "plugins": [
     {

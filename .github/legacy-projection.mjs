@@ -55,6 +55,47 @@ export const isExcluded = (path, exclude = SYNC_CONTRACT.exclude) =>
 /** True when `path` is a destination-only path the mirror keeps. */
 export const isPreserved = (path, preserve = SYNC_CONTRACT.preserve) => preserve.includes(path);
 
+/** Owner email on the Claude marketplace already accepted at destRepo. */
+export const ACCEPTED_LISTING_OWNER_EMAIL = "support@arcade.dev";
+
+const GENERATOR_PATH = "scripts/generate-manifests.mjs";
+const MARKETPLACE_PATH = ".claude-plugin/marketplace.json";
+const GENERATOR_ROOT_LINE = 'const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");\n';
+const GENERATOR_ROOT_PATCH = `${GENERATOR_ROOT_LINE}
+// The accepted Claude marketplace for this plugin is arcadeai-labs/omnimcp.
+// Keep its owner email when generating the catalog. The author URL still comes
+// from plugin.json.
+export const ACCEPTED_LISTING_OWNER_EMAIL = ${JSON.stringify(ACCEPTED_LISTING_OWNER_EMAIL)};
+`;
+const GENERATOR_OWNER_LINE = "        owner: author,";
+const GENERATOR_OWNER_PATCH = "        owner: { ...author, email: ACCEPTED_LISTING_OWNER_EMAIL },";
+
+/**
+ * The accepted listing keeps marketplace name, plugin name, and source "./".
+ * This adds only the owner email the canonical generator omits.
+ * @param {string} path
+ * @param {{ mode: string, bytes: Buffer, blobSha: string }} entry
+ */
+export const applyAcceptedListing = (path, entry) => {
+  if (path === GENERATOR_PATH) {
+    const source = entry.bytes.toString("utf8");
+    if (source.includes(GENERATOR_OWNER_PATCH)) return entry;
+    if (!source.includes(GENERATOR_ROOT_LINE) || !source.includes(GENERATOR_OWNER_LINE)) {
+      throw new Error("canonical generator no longer has the marketplace owner line the listing patch expects");
+    }
+    const patched = source
+      .replace(GENERATOR_ROOT_LINE, GENERATOR_ROOT_PATCH)
+      .replace(GENERATOR_OWNER_LINE, GENERATOR_OWNER_PATCH);
+    return entryFromBytes(entry.mode, patched);
+  }
+  if (path === MARKETPLACE_PATH) {
+    const manifest = JSON.parse(entry.bytes.toString("utf8"));
+    manifest.owner = { ...manifest.owner, email: ACCEPTED_LISTING_OWNER_EMAIL };
+    return entryFromBytes(entry.mode, `${JSON.stringify(manifest, null, 2)}\n`);
+  }
+  return entry;
+};
+
 /** Stable notice kept only in the legacy tree. */
 export const repositoryControlsDocument = (contract = SYNC_CONTRACT) =>
   [
@@ -78,7 +119,12 @@ export const repositoryControlsDocument = (contract = SYNC_CONTRACT) =>
     "are removed when the canonical tree is copied. Their notices remain in git",
     "history. Files copied from the canonical package keep that package's MIT notice.",
     "",
-    "This tree does not change the existing legacy listing.",
+    "This tree does not change the existing legacy listing. The Claude",
+    "marketplace stays `arcade` with plugin `arcade` at `source: \"./\"`, and",
+    `the marketplace owner keeps \`${ACCEPTED_LISTING_OWNER_EMAIL}\`.`,
+    "Existing and hub installs use this repository. New installs use",
+    `\`${contract.sourceRepo}\`. Do not add both in one Claude profile: they`,
+    "share the marketplace name `arcade`.",
     "",
   ].join("\n");
 
@@ -90,7 +136,7 @@ export const desiredTree = ({ sourceFiles, destFiles, contract = SYNC_CONTRACT }
   const desired = new Map();
   for (const [path, entry] of sourceFiles) {
     if (isExcluded(path, contract.exclude) || isPreserved(path, contract.preserve) || path in (contract.replacements ?? {})) continue;
-    desired.set(path, entry);
+    desired.set(path, applyAcceptedListing(path, entry));
   }
   for (const [destination, source] of Object.entries(contract.replacements ?? {})) {
     if (sourceFiles.has(source)) desired.set(destination, sourceFiles.get(source));

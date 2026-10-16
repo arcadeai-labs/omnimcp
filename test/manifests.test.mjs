@@ -25,6 +25,12 @@ test("commands are named arcade-* and listed in the support matrix and README", 
 });
 
 test("Claude marketplace lists the plugin as Arcade", () => {
-  const [listed] = JSON.parse(readRepoFile(".claude-plugin/marketplace.json")).plugins;
+  const marketplace = JSON.parse(readRepoFile(".claude-plugin/marketplace.json"));
+  const [listed] = marketplace.plugins;
+  assert.equal(marketplace.name, "arcade");
+  assert.equal(marketplace.owner.email, "support@arcade.dev");
+  assert.equal(listed.name, "arcade");
   assert.equal(listed.displayName, "Arcade");
+  assert.equal(listed.source, "./");
+  assert.equal(listed.repository, "https://github.com/ArcadeAI/arcade-plugin");
 });
