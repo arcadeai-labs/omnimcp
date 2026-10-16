@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { SYNC_CONTRACT, desiredTree, diffTrees } from "./legacy-projection.mjs";
+import { ACCEPTED_LISTING_PATHS, SYNC_CONTRACT, desiredTree, diffTrees, hydrateAcceptedListing } from "./legacy-projection.mjs";
 
 const SHA = /^[0-9a-f]{40}$/;
 const assertSha = (sha) => { if (!SHA.test(sha ?? "")) throw new Error("expected an immutable Git SHA"); };
@@ -25,12 +25,13 @@ export const verifyProjection = ({ sourceFiles, candidateFiles, baseFiles }) => 
   return { files: expected.size, differences: 0 };
 };
 
-const git = (repo, args) => {
-  const result = spawnSync("git", args, { cwd: repo, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+const git = (repo, args, encoding = "utf8") => {
+  const result = spawnSync("git", args, { cwd: repo, encoding, maxBuffer: 32 * 1024 * 1024 });
   if (result.status !== 0) throw new Error(result.stderr || `git ${args[0]} failed`);
   return result.stdout;
 };
-const localTree = (repo, sha) => new Map(git(repo, ["ls-tree", "-r", "-z", sha]).split("\0").filter(Boolean).map((record) => {
+const localTree = (repo, sha) => {
+  const tree = new Map(git(repo, ["ls-tree", "-r", "-z", sha]).split("\0").filter(Boolean).map((record) => {
   const separator = record.indexOf("\t");
   if (separator < 0) throw new Error("malformed Git tree record");
   const meta = record.slice(0, separator);
@@ -38,7 +39,14 @@ const localTree = (repo, sha) => new Map(git(repo, ["ls-tree", "-r", "-z", sha])
   const [mode, type, blobSha] = meta.split(" ");
   if (type !== "blob" || !["100644", "100755"].includes(mode)) throw new Error(`unsupported mirror entry ${path}`);
   return [path, { mode, blobSha }];
-}));
+  }));
+  for (const path of ACCEPTED_LISTING_PATHS) {
+    const entry = tree.get(path);
+    if (!entry) continue;
+    entry.bytes = git(repo, ["cat-file", "blob", entry.blobSha], "buffer");
+  }
+  return tree;
+};
 
 export const createGithubReader = ({ token, fetch = globalThis.fetch }) => {
   const api = async (path) => {
@@ -59,10 +67,16 @@ export const createGithubReader = ({ token, fetch = globalThis.fetch }) => {
       const commit = await this.commit(repo, sha);
       const tree = await api(`/repos/${repo}/git/trees/${commit.tree.sha}?recursive=1`);
       if (tree.truncated) throw new Error("GitHub tree is truncated");
-      return new Map(tree.tree.filter((item) => item.type !== "tree").map((item) => {
+      const entries = new Map(tree.tree.filter((item) => item.type !== "tree").map((item) => {
         if (item.type !== "blob" || !["100644", "100755"].includes(item.mode)) throw new Error(`unsupported mirror entry ${item.path}`);
         return [item.path, { mode: item.mode, blobSha: item.sha }];
       }));
+      await hydrateAcceptedListing(entries, async (blobSha) => {
+        const blob = await api(`/repos/${repo}/git/blobs/${blobSha}`);
+        if (blob.encoding !== "base64") throw new Error(`unexpected blob encoding for ${blobSha}`);
+        return Buffer.from(blob.content, "base64");
+      });
+      return entries;
     },
   };
 };

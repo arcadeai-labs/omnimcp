@@ -60,6 +60,8 @@ export const ACCEPTED_LISTING_OWNER_EMAIL = "support@arcade.dev";
 
 const GENERATOR_PATH = "scripts/generate-manifests.mjs";
 const MARKETPLACE_PATH = ".claude-plugin/marketplace.json";
+/** Source paths whose bytes the listing patch must read. Integrity trees only carry mode and blobSha until these blobs are loaded. */
+export const ACCEPTED_LISTING_PATHS = [GENERATOR_PATH, MARKETPLACE_PATH];
 const GENERATOR_ROOT_LINE = 'const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");\n';
 const GENERATOR_ROOT_PATCH = `${GENERATOR_ROOT_LINE}
 // The accepted Claude marketplace for this plugin is arcadeai-labs/omnimcp.
@@ -71,14 +73,39 @@ const GENERATOR_OWNER_LINE = "        owner: author,";
 const GENERATOR_OWNER_PATCH = "        owner: { ...author, email: ACCEPTED_LISTING_OWNER_EMAIL },";
 
 /**
+ * Load blob contents for the listing paths. `git ls-tree` and the GitHub trees
+ * API only provide mode and blobSha; the patch cannot run until those blobs
+ * are read.
+ * @param {Map<string, { mode: string, blobSha: string, bytes?: Buffer }>} tree
+ * @param {(blobSha: string) => Buffer | Promise<Buffer>} readBlob
+ */
+export const hydrateAcceptedListing = async (tree, readBlob) => {
+  await Promise.all(ACCEPTED_LISTING_PATHS.map(async (path) => {
+    const entry = tree.get(path);
+    if (!entry || Buffer.isBuffer(entry.bytes)) return;
+    const bytes = await readBlob(entry.blobSha);
+    if (!Buffer.isBuffer(bytes)) throw new Error(`blob reader returned no bytes for ${path}`);
+    entry.bytes = bytes;
+  }));
+  return tree;
+};
+
+const listingBytes = (path, entry) => {
+  if (!Buffer.isBuffer(entry?.bytes)) {
+    throw new Error(`listing patch requires blob bytes for ${path}; load ${path} before projection`);
+  }
+  return entry.bytes.toString("utf8");
+};
+
+/**
  * The accepted listing keeps marketplace name, plugin name, and source "./".
  * This adds only the owner email the canonical generator omits.
  * @param {string} path
- * @param {{ mode: string, bytes: Buffer, blobSha: string }} entry
+ * @param {{ mode: string, bytes?: Buffer, blobSha: string }} entry
  */
 export const applyAcceptedListing = (path, entry) => {
   if (path === GENERATOR_PATH) {
-    const source = entry.bytes.toString("utf8");
+    const source = listingBytes(path, entry);
     if (source.includes(GENERATOR_OWNER_PATCH)) return entry;
     if (!source.includes(GENERATOR_ROOT_LINE) || !source.includes(GENERATOR_OWNER_LINE)) {
       throw new Error("canonical generator no longer has the marketplace owner line the listing patch expects");
@@ -89,7 +116,7 @@ export const applyAcceptedListing = (path, entry) => {
     return entryFromBytes(entry.mode, patched);
   }
   if (path === MARKETPLACE_PATH) {
-    const manifest = JSON.parse(entry.bytes.toString("utf8"));
+    const manifest = JSON.parse(listingBytes(path, entry));
     manifest.owner = { ...manifest.owner, email: ACCEPTED_LISTING_OWNER_EMAIL };
     return entryFromBytes(entry.mode, `${JSON.stringify(manifest, null, 2)}\n`);
   }

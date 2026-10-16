@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { applyAcceptedListing, entryFromBytes } from "../.github/legacy-projection.mjs";
+import { applyAcceptedListing, desiredTree, entryFromBytes, gitBlobSha, hydrateAcceptedListing } from "../.github/legacy-projection.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -17,6 +17,35 @@ test("the listing patch reproduces the committed generator and marketplace", () 
   for (const relativePath of ["scripts/generate-manifests.mjs", ".claude-plugin/marketplace.json"]) {
     const patched = applyAcceptedListing(relativePath, entryFromBytes("100644", headFile(relativePath)));
     assert.equal(patched.bytes.toString("utf8"), readFileSync(path.join(ROOT, relativePath), "utf8"), relativePath);
+  }
+});
+
+test("a sha-only listing entry fails before reading missing bytes", () => {
+  assert.throws(
+    () => applyAcceptedListing("scripts/generate-manifests.mjs", { mode: "100644", blobSha: "abc" }),
+    (error) => {
+      assert.equal(error instanceof TypeError, false);
+      assert.match(error.message, /blob bytes for scripts\/generate-manifests\.mjs/);
+      return true;
+    },
+  );
+});
+
+test("sha-only source trees match the committed listing after those blobs load", async () => {
+  const sourceFiles = new Map([["README.md", { mode: "100644", blobSha: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }]]);
+  const blobs = new Map();
+  for (const relativePath of ["scripts/generate-manifests.mjs", ".claude-plugin/marketplace.json"]) {
+    const bytes = execFileSync("git", ["show", `HEAD^:${relativePath}`], { cwd: ROOT, encoding: "buffer" });
+    const blobSha = gitBlobSha(bytes);
+    blobs.set(blobSha, bytes);
+    sourceFiles.set(relativePath, { mode: "100644", blobSha });
+  }
+  await hydrateAcceptedListing(sourceFiles, async (blobSha) => blobs.get(blobSha));
+  const desired = desiredTree({ sourceFiles, destFiles: new Map() });
+  assert.equal(desired.get("README.md").blobSha, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+  assert.equal(desired.get("README.md").bytes, undefined);
+  for (const relativePath of ["scripts/generate-manifests.mjs", ".claude-plugin/marketplace.json"]) {
+    assert.equal(desired.get(relativePath).blobSha, gitBlobSha(readFileSync(path.join(ROOT, relativePath))));
   }
 });
 
