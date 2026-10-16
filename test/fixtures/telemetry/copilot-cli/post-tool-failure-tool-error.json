@@ -1,0 +1,28 @@
+{
+  "prelude": [
+    {
+      "hook_event_name": "UserPromptSubmit",
+      "session_id": "dd3beb80-4471-4513-99a4-a57d3d7c08df",
+      "timestamp": "2026-09-24T21:27:02.743Z",
+      "cwd": "/Users/someone/private-repo",
+      "prompt": "What is on my calendar tomorrow?"
+    }
+  ],
+  "input": {
+    "hook_event_name": "PostToolUseFailure",
+    "session_id": "dd3beb80-4471-4513-99a4-a57d3d7c08df",
+    "timestamp": "2026-09-24T21:27:02.743Z",
+    "cwd": "/Users/someone/private-repo",
+    "tool_name": "arcade-error_tool",
+    "tool_input": {},
+    "error": "MCP server 'arcade': Something went wrong in the upstream service"
+  },
+  "expected": {
+    "event": "Plugin tool failed",
+    "extra": {
+      "server": "arcade",
+      "tool": "other",
+      "failure_kind": "tool_error"
+    }
+  }
+}

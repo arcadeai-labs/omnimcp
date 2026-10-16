@@ -1,5 +1,7 @@
 .DS_Store
 *.log
-node_modules/
 .env
 .env.*
+node_modules/
+docs/internal/
+docs/research/

@@ -1,28 +1,29 @@
-name: check
+name: mirror-integrity
 
+# Canonical template: installed only in the trusted destination base.
+# pull_request_target uses the trusted base workflow and checkout. Never
+# check out or execute the candidate, install its dependencies, or read its policy.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
 
 jobs:
-  check:
+  mirror-integrity:
+    if: github.repository == 'arcadeai-labs/omnimcp'
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          node-version: 20
-
-      - name: Structural checks
-        run: node scripts/check.mjs
-
-      - uses: oven-sh/setup-bun@v2
-
-      - name: OpenCode plugin smoke test
-        run: bun scripts/opencode-smoke.ts
-
-      - name: OpenCode package contents
-        working-directory: clients/opencode
-        run: npm pack --dry-run
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.23.2'
+      - name: Compare Git data with trusted canonical main
+        run: node .github/verify-mirror.mjs --github
+        env:
+          GH_TOKEN: ${{ github.token }}

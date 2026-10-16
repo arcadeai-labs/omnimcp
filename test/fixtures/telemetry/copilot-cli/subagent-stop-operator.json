@@ -1,0 +1,23 @@
+{
+  "input": {
+    "hook_event_name": "SubagentStop",
+    "session_id": "dd3beb80-4471-4513-99a4-a57d3d7c08df",
+    "timestamp": "2026-09-24T21:27:02.743Z",
+    "cwd": "/Users/someone/private-repo",
+    "transcript_path": "/Users/someone/.copilot/session-state/dd3beb80-4471-4513-99a4-a57d3d7c08df/events.jsonl",
+    "agent_id": "57946be7-1a73-40ca-a042-abb0f68d9445",
+    "agent_type": "arcade:arcade-operator",
+    "agent_name": "arcade:arcade-operator",
+    "agent_display_name": "arcade-operator",
+    "stop_reason": "end_turn",
+    "last_assistant_message": "Done.\n\nstatus: completed"
+  },
+  "expected": {
+    "event": "Plugin subagent stopped",
+    "extra": {
+      "agent": "arcade-operator",
+      "status": "completed",
+      "subagent_session": "$hash:57946be7-1a73-40ca-a042-abb0f68d9445"
+    }
+  }
+}

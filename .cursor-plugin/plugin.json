@@ -1,44 +1,30 @@
 {
-    "name": "arcade",
-    "displayName": "OmniMCP by Arcade.dev",
-    "description": "OmniMCP provides agents access to services like Slack, Gmail, GitHub, Linear, Notion, Dropbox, and other similar services.",
-    "version": "0.6.0",
-    "author": {
-        "name": "Arcade.dev",
-        "email": "support@arcade.dev"
-    },
-    "publisher": "Arcade.dev",
-    "homepage": "https://omni.arcade.dev",
-    "repository": "https://github.com/arcadeai-labs/omnimcp",
-    "license": "Apache-2.0",
-    "logo": "assets/omni.svg",
-    "category": "Productivity",
-    "keywords": [
-        "arcade",
-        "omni",
-        "mcp",
-        "tools",
-        "tool-discovery",
-        "agent",
-        "oauth",
-        "slack",
-        "github",
-        "gmail",
-        "google-calendar",
-        "notion",
-        "linear",
-        "integrations",
-        "automation"
-    ],
-    "tags": [
-        "mcp",
-        "integrations",
-        "agent-tools"
-    ],
-    "rules": "clients/cursor/rules",
-    "skills": "components/skills",
-    "agents": "components/agents",
-    "commands": "components/commands",
-    "hooks": "clients/cursor/hooks/hooks.json",
-    "mcpServers": "clients/cursor/mcp.json"
+  "name": "arcade",
+  "description": "Your agent, every app you've connected. Ask in plain English — email, calendar, issues, chat — and Arcade finds and runs the right tool. Sign in once in the browser — without ever handing your agent a key.",
+  "author": {
+    "name": "Arcade.dev",
+    "url": "https://arcade.dev"
+  },
+  "homepage": "https://arcade.dev",
+  "license": "MIT",
+  "keywords": [
+    "arcade",
+    "mcp",
+    "agent-skills",
+    "connected-apps"
+  ],
+  "version": "0.7.0",
+  "displayName": "Arcade",
+  "logo": "assets/logo.png",
+  "repository": "https://github.com/ArcadeAI/arcade-plugin",
+  "skills": "skills",
+  "agents": "agents",
+  "commands": "commands",
+  "rules": "clients/cursor/rules",
+  "hooks": "clients/cursor/hooks/hooks.json",
+  "mcpServers": {
+    "arcade": {
+      "url": "https://api.arcade.dev/mcp/arcade"
+    }
+  }
 }

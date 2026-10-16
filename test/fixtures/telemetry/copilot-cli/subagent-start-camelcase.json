@@ -1,0 +1,10 @@
+{
+  "input": {
+    "sessionId": "dd3beb80-4471-4513-99a4-a57d3d7c08df",
+    "timestamp": 1790285282793,
+    "cwd": "/Users/someone/private-repo",
+    "agentName": "arcade:arcade-operator",
+    "agentDisplayName": "arcade-operator"
+  },
+  "expected": null
+}

@@ -1,0 +1,26 @@
+{
+  "name": "arcade",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/generate-manifests.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify:claude": "claude plugin validate . --strict && claude plugin validate .claude-plugin/plugin.json --strict",
+    "verify:cursor": "node scripts/verify-cursor.mjs",
+    "verify:codex": "node scripts/verify-codex.mjs",
+    "verify:copilot": "node scripts/verify-copilot.mjs",
+    "verify": "npm run typecheck && npm test && npm run verify:claude && npm run verify:cursor && npm run verify:codex && npm run verify:copilot",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@anthropic-ai/claude-code": "2.1.258",
+    "@github/copilot": "1.0.88",
+    "@openai/codex": "0.156.1",
+    "@types/node": "22.20.4",
+    "ajv": "8.20.0",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": "22.23.2"
+  }
+}

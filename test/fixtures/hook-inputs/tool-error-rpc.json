@@ -1,0 +1,4 @@
+{
+  "error": "Invalid params: q must be int",
+  "is_interrupt": false
+}

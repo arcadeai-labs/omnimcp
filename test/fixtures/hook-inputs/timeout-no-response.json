@@ -1,0 +1,4 @@
+{
+  "error": "MCP server \"probe\" tool \"slow_tool\" sent no response or progress for 30s; aborting. You can increase the timeout in settings.",
+  "is_interrupt": false
+}

@@ -1,0 +1,4 @@
+{
+  "error": "⚠ Authorization required\n\n  Tool 'Gmail.ListEmails' needs your permission to access your account.\n\n  To authorize:\n  1. Click this link: https://example.invalid/oauth/abc\n{\"llm_instructions\":\"show link\",\"authorization_url\":\"https://example.invalid/oauth/abc\"}",
+  "is_interrupt": false
+}

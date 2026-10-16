@@ -1,0 +1,12 @@
+{
+  "input": {
+    "hook_event_name": "SubagentStop",
+    "session_id": "dd3beb80-4471-4513-99a4-a57d3d7c08df",
+    "timestamp": "2026-09-24T21:27:02.743Z",
+    "cwd": "/Users/someone/private-repo",
+    "agent_type": "general-purpose",
+    "agent_name": "general-purpose",
+    "last_assistant_message": "status: completed"
+  },
+  "expected": null
+}
