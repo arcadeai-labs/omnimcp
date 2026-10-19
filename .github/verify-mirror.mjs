@@ -106,7 +106,9 @@ const main = async () => {
   if (process.argv.includes("--github")) {
     if (process.env.GITHUB_EVENT_NAME !== "pull_request_target") throw new Error("run the checker from the trusted base workflow");
     const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
-    console.log(JSON.stringify(await verifyGithubMirror({ event, repository: process.env.GITHUB_REPOSITORY, reader: createGithubReader({ token: process.env.GH_TOKEN }) }), null, 2));
+    const tokenFlag = process.argv.indexOf("--token");
+    const token = tokenFlag >= 0 ? process.argv[tokenFlag + 1] : "";
+    console.log(JSON.stringify(await verifyGithubMirror({ event, repository: process.env.GITHUB_REPOSITORY, reader: createGithubReader({ token }) }), null, 2));
     return;
   }
   // Explicit local review only. These operator-provided pins are never used

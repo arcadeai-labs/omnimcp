@@ -68,9 +68,13 @@ const GENERATOR_ROOT_PATCH = `${GENERATOR_ROOT_LINE}
 // Keep its owner email when generating the catalog. The author URL still comes
 // from plugin.json.
 export const ACCEPTED_LISTING_OWNER_EMAIL = ${JSON.stringify(ACCEPTED_LISTING_OWNER_EMAIL)};
+export const PRIVACY_POLICY_URL = "https://www.arcade.dev/privacy-policy/";
 `;
 const GENERATOR_OWNER_LINE = "        owner: author,";
 const GENERATOR_OWNER_PATCH = "        owner: { ...author, email: ACCEPTED_LISTING_OWNER_EMAIL },";
+const GENERATOR_HOOKS_LINE = "        hooks: `./${HOSTS[\"claude-code\"].manifest}`,\n";
+const GENERATOR_HOOKS_PATCH = `${GENERATOR_HOOKS_LINE}        privacyPolicyUrl: PRIVACY_POLICY_URL,\n`;
+const PRIVACY_EXPORT = 'export const PRIVACY_POLICY_URL = "https://www.arcade.dev/privacy-policy/";\n';
 
 /**
  * Load blob contents for the listing paths. `git ls-tree` and the GitHub trees
@@ -105,14 +109,26 @@ const listingBytes = (path, entry) => {
  */
 export const applyAcceptedListing = (path, entry) => {
   if (path === GENERATOR_PATH) {
-    const source = listingBytes(path, entry);
-    if (source.includes(GENERATOR_OWNER_PATCH)) return entry;
-    if (!source.includes(GENERATOR_ROOT_LINE) || !source.includes(GENERATOR_OWNER_LINE)) {
-      throw new Error("canonical generator no longer has the marketplace owner line the listing patch expects");
+    let patched = listingBytes(path, entry);
+    if (!patched.includes(GENERATOR_OWNER_PATCH)) {
+      if (!patched.includes(GENERATOR_ROOT_LINE) || !patched.includes(GENERATOR_OWNER_LINE)) {
+        throw new Error("canonical generator no longer has the marketplace owner line the listing patch expects");
+      }
+      patched = patched.replace(GENERATOR_ROOT_LINE, GENERATOR_ROOT_PATCH).replace(GENERATOR_OWNER_LINE, GENERATOR_OWNER_PATCH);
     }
-    const patched = source
-      .replace(GENERATOR_ROOT_LINE, GENERATOR_ROOT_PATCH)
-      .replace(GENERATOR_OWNER_LINE, GENERATOR_OWNER_PATCH);
+    if (!patched.includes(PRIVACY_EXPORT)) {
+      const emailExport = `export const ACCEPTED_LISTING_OWNER_EMAIL = ${JSON.stringify(ACCEPTED_LISTING_OWNER_EMAIL)};\n`;
+      if (!patched.includes(emailExport)) {
+        throw new Error("canonical generator is missing the listing owner export the privacy patch expects");
+      }
+      patched = patched.replace(emailExport, `${emailExport}${PRIVACY_EXPORT}`);
+    }
+    if (!patched.includes(GENERATOR_HOOKS_PATCH)) {
+      if (!patched.includes(GENERATOR_HOOKS_LINE)) {
+        throw new Error("canonical generator is missing the Claude hooks line the privacy patch expects");
+      }
+      patched = patched.replace(GENERATOR_HOOKS_LINE, GENERATOR_HOOKS_PATCH);
+    }
     return entryFromBytes(entry.mode, patched);
   }
   if (path === MARKETPLACE_PATH) {

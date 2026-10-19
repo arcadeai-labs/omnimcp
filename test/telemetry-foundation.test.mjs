@@ -1,12 +1,11 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { after, test } from "node:test";
 import { EVENTS, eventSchema } from "../hooks/telemetry-contract.mjs";
-import { EVENT_ENV, PLUGIN_VERSION, POSTHOG_KEY, TELEMETRY_ENABLED } from "../hooks/telemetry-config.mjs";
+import { EVENT_ENV, PLUGIN_VERSION, TELEMETRY_ENABLED } from "../hooks/telemetry-config.mjs";
 import { buildEvent, isArcadeCall } from "../hooks/telemetry-events.mjs";
 import { SCOPE_DIRECTORY, scopeForInput } from "../hooks/hook-scope.mjs";
 import { clearSessionScope, isOptedOut, runTelemetry } from "../hooks/telemetry-run.mjs";
@@ -251,34 +250,20 @@ test("isOptedOut respects case on ARCADE_PLUGIN_TELEMETRY", () => {
   assert.equal(isOptedOut(fakeAdapter.optOutSwitches, { FAKE_OFFLINE: "FALSE" }), false);
 });
 
-test("telemetry-send posts one event and gives up on a silent host", async () => {
+test("telemetry-send exits without reading the environment or contacting a host", async () => {
   const server = await startServer();
-  const silent = net.createServer(() => {});
-  await new Promise((resolve) => silent.listen(0, "127.0.0.1", resolve));
-  const silentUrl = `http://127.0.0.1:${silent.address().port}`;
   try {
     const event = buildEvent(hookInput({ hook_event_name: "UserPromptSubmit", prompt: "calendar" }), OPTIONS);
     const started = Date.now();
     const child = spawn(process.execPath, [path.join(ROOT, "hooks", "telemetry-send.mjs")], {
-      env: { ...process.env, ARCADE_PLUGIN_TELEMETRY_HOST: server.url, [EVENT_ENV]: JSON.stringify(event) },
+      env: { PATH: process.env.PATH, ARCADE_PLUGIN_TELEMETRY_HOST: server.url, [EVENT_ENV]: JSON.stringify(event) },
     });
     assert.equal(await new Promise((resolve) => child.on("exit", resolve)), 0);
-    await waitForRequests(server.requests, 1);
-    const body = JSON.parse(server.requests[0].body);
-    assert.equal(body.api_key, POSTHOG_KEY);
-    assert.equal(body.event, "Plugin prompt submitted");
-
-    const hangStart = Date.now();
-    const hang = spawn(process.execPath, [path.join(ROOT, "hooks", "telemetry-send.mjs")], {
-      env: { ...process.env, ARCADE_PLUGIN_TELEMETRY_HOST: silentUrl, [EVENT_ENV]: JSON.stringify(event) },
-    });
-    assert.equal(await new Promise((resolve) => hang.on("exit", resolve)), 0);
-    const elapsed = Date.now() - hangStart;
-    assert.ok(elapsed >= 900 && elapsed < 5000, `timeout was ${elapsed} ms`);
-    assert.ok(Date.now() - started < 5000);
+    assert.ok(Date.now() - started < 1000);
+    await sleep(200);
+    assert.deepEqual(server.requests, []);
   } finally {
     await server.close();
-    silent.close();
   }
 });
 

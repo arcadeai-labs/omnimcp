@@ -18,6 +18,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // Keep its owner email when generating the catalog. The author URL still comes
 // from plugin.json.
 export const ACCEPTED_LISTING_OWNER_EMAIL = "support@arcade.dev";
+export const PRIVACY_POLICY_URL = "https://www.arcade.dev/privacy-policy/";
 
 // Claude Code and Cowork only accept the operator at the default agents/ path
 // (the CLI wants .md paths in "agents", Cowork wants folders). Copilot CLI and
@@ -216,6 +217,7 @@ const buildFiles = (root) => {
       serialize({
         ...identity,
         hooks: `./${HOSTS["claude-code"].manifest}`,
+        privacyPolicyUrl: PRIVACY_POLICY_URL,
         // Claude Code needs "http"; the Agent Plugins mcp.json says "streamable-http".
         mcpServers: { arcade: { type: "http", url } },
       }),

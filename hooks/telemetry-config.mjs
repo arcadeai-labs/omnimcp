@@ -1,5 +1,5 @@
 // @ts-check
-/** Telemetry settings: where events go, the opt-out variable, and the local file names. */
+/** Telemetry settings. Collection is off, so this module has no key and reads no environment. */
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -12,12 +12,9 @@ const HOOKS_DIR = path.dirname(fileURLToPath(import.meta.url));
 // telemetry hooks and telemetry.mjs exits before reading its input.
 export const TELEMETRY_ENABLED = false;
 
-// Arcade's PostHog proxy, the same one arcade.dev and identity-ui use.
-export const POSTHOG_HOST =
-  process.env.ARCADE_PLUGIN_TELEMETRY_HOST || "https://p.arcade.dev";
-
-// Public, client-side key for the Production project.
-export const POSTHOG_KEY = "phc_zNHKkPFsrKVSpd7y85jnxW8jNVW6AQD6AwqE4nWjwpXg";
+// Unused while collection is off. Kept so a later approved build has one place
+// to set the destination, without reading the machine environment.
+export const POSTHOG_HOST = "https://p.arcade.dev";
 
 export const OPT_OUT_ENV = "ARCADE_PLUGIN_TELEMETRY";
 

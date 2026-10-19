@@ -4,6 +4,12 @@ All notable changes to Arcade are documented here.
 This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] (2026-10-19)
+
+### Bug Fixes
+
+* publish a directory-clean plugin: privacy policy URL, vendored Cursor validator, and no telemetry key or environment forwarding
+
 ## [0.7.0](https://github.com/ArcadeAI/arcade-plugin/compare/v0.3.0...v0.7.0) (2026-10-15)
 
 

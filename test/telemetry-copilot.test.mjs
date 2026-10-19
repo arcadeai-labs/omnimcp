@@ -30,8 +30,6 @@ import {
   hash16,
   hookEnv,
   runTelemetryScript,
-  SEND_SCRIPT,
-  spawnExitCode,
   startServer,
   tempDataDir,
 } from "./telemetry-helpers.mjs";
@@ -398,13 +396,7 @@ test(
         assert.equal(ran.status, 0);
         assert.equal(ran.stdout, "");
       }
-      await assertNothingSent(server, hookEnv({ ARCADE_PLUGIN_TELEMETRY_HOST: server.url }), (env) =>
-        spawnExitCode(
-          powerShellExe(),
-          powerShellArgs(`& '${process.execPath}' '${SEND_SCRIPT}'; exit $LASTEXITCODE`),
-          { cwd, env },
-        ),
-      );
+      await assertNothingSent(server, hookEnv({ ARCADE_PLUGIN_TELEMETRY_HOST: server.url }));
       assert.deepEqual(readdirSync(dataDir), []);
     } finally {
       await server.close();
