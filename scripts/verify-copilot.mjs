@@ -17,7 +17,12 @@ const servers = JSON.parse(readFileSync(join(root, "mcp.json"), "utf8")).mcpServ
 const skills = readdirSync(join(root, "skills")).filter((name) => existsSync(join(root, "skills", name, "SKILL.md")));
 
 const work = mkdtempSync(join(tmpdir(), "arcade-copilot-verify-"));
-const env = { ...process.env, COPILOT_HOME: work };
+// Pass PATH and locale only. Do not copy the parent environment.
+const env = { PATH: process.env.PATH ?? "", COPILOT_HOME: work };
+for (const name of ["PATHEXT", "SystemRoot", "TMPDIR", "TEMP", "TMP", "LANG", "LC_ALL"]) {
+  const value = process.env[name];
+  if (value) env[name] = value;
+}
 
 function copilot(...args) {
   const result = spawnSync("copilot", args, { cwd: work, env, encoding: "utf8" });

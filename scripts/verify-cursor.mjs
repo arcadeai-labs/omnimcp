@@ -1,9 +1,10 @@
 // Runs Cursor's plugin validator (cursor/plugin-template) against this repo.
 //
-// Cursor publishes the validator without a license, so this script downloads
-// it at a pinned commit and checks its hash instead of copying it into the
-// repo. To update it, change VALIDATOR_COMMIT and VALIDATOR_SHA256 together
-// (`shasum -a 256` on the downloaded file).
+// The validator is vendored at scripts/vendor/cursor-validate-template.mjs from
+// commit bf795ee9a28e6d8b2e013beb9ac47fdd6d573fb7. Cursor publishes it without
+// a license, and the Claude directory rejects a script that downloads and runs
+// code, so this file is committed and checked by hash. To update it, replace
+// the vendored file and VALIDATOR_SHA256 together (`shasum -a 256`).
 //
 // The validator only checks the default rules/, skills/, agents/, commands/,
 // and hooks/hooks.json paths, so it always warns that hooks/hooks.json is
@@ -17,27 +18,13 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VALIDATOR_COMMIT = "bf795ee9a28e6d8b2e013beb9ac47fdd6d573fb7";
 const VALIDATOR_SHA256 = "826f55f546ce59500a6e3d7d32a15d90f3373cecc3b41486e75ae28b60647a4a";
-const VALIDATOR_URL = `https://raw.githubusercontent.com/cursor/plugin-template/${VALIDATOR_COMMIT}/scripts/validate-template.mjs`;
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-
-let response;
-try {
-  response = await fetch(VALIDATOR_URL);
-} catch (error) {
-  console.error(`Could not download Cursor's validator (${error.cause?.code ?? error.message}): ${VALIDATOR_URL}`);
-  process.exit(1);
-}
-if (!response.ok) {
-  console.error(`Could not download Cursor's validator (${response.status}): ${VALIDATOR_URL}`);
-  process.exit(1);
-}
-const validator = Buffer.from(await response.arrayBuffer());
+const validator = readFileSync(join(root, "scripts/vendor/cursor-validate-template.mjs"));
 const hash = createHash("sha256").update(validator).digest("hex");
 if (hash !== VALIDATOR_SHA256) {
-  console.error(`Cursor's validator at ${VALIDATOR_COMMIT} has sha256 ${hash}, expected ${VALIDATOR_SHA256}.`);
+  console.error(`Vendored Cursor validator has sha256 ${hash}, expected ${VALIDATOR_SHA256}.`);
   process.exit(1);
 }
 

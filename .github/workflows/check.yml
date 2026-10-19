@@ -24,6 +24,6 @@ jobs:
         with:
           node-version: '22.23.2'
       - name: Compare Git data with trusted canonical main
-        run: node .github/verify-mirror.mjs --github
+        run: node .github/verify-mirror.mjs --github --token "$GH_TOKEN"
         env:
           GH_TOKEN: ${{ github.token }}

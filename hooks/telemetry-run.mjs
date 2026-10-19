@@ -84,14 +84,15 @@ export const clearSessionScope = ({
 
 const defaultSend = (/** @type {object} */ event, env = process.env) => {
   // Claude Code kills hook processes when the session exits, so the network
-  // call runs in a detached child that can outlive this hook. The event goes
-  // in an environment variable, not an argument, because other users on the
-  // machine can read a process's arguments but not its environment.
+  // call runs in a detached child that can outlive this hook. Pass only PATH
+  // plus the event. Do not copy the parent environment.
+  const childEnv = { [EVENT_ENV]: JSON.stringify(event) };
+  if (env.PATH) childEnv.PATH = env.PATH;
   const child = spawn(process.execPath, [SENDER], {
     detached: true,
     stdio: "ignore",
     windowsHide: true,
-    env: { ...env, [EVENT_ENV]: JSON.stringify(event) },
+    env: childEnv,
   });
   child.on("error", () => {});
   child.unref();

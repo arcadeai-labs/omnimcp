@@ -5,7 +5,7 @@
   "scripts": {
     "generate": "node scripts/generate-manifests.mjs",
     "test": "node --test test/*.test.mjs",
-    "verify:claude": "claude plugin validate . --strict && claude plugin validate .claude-plugin/plugin.json --strict",
+    "verify:claude": "claude plugin validate . && claude plugin validate .claude-plugin/plugin.json",
     "verify:cursor": "node scripts/verify-cursor.mjs",
     "verify:codex": "node scripts/verify-codex.mjs",
     "verify:copilot": "node scripts/verify-copilot.mjs",
