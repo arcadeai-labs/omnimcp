@@ -3,5 +3,7 @@
 .env
 .env.*
 node_modules/
+dev/.cache/
 docs/internal/
 docs/research/
+dist/

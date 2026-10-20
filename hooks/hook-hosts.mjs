@@ -41,10 +41,10 @@ export const HOSTS = {
   // (snake_case SessionStart input; SubagentStart still sends camelCase
   // agentName in 1.0.88); it drops prompt-hook output, so it has no prompt
   // reminder hook. The other events it lists run only telemetry.
-  // VS Code reads this file too but doesn't set or expand ${PLUGIN_ROOT} for
-  // Agent Plugins hooks or pass their output to the model (pluginParsers.ts,
-  // copilotPluginConverters.ts on microsoft/vscode main, 2026-09), so each
-  // command checks that its script exists and otherwise exits 0 without output.
+  // VS Code Copilot sessions use the shared Copilot hook implementation and
+  // this manifest for session/subagent context (see docs/install/vscode.md).
+  // The script-existence check is defensive when the plugin path or script
+  // is missing; it is not a VS Code capability limit.
   copilot: {
     manifest: "com.github.copilot/hooks/hooks.json",
     format: "flat",

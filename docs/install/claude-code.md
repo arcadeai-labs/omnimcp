@@ -37,6 +37,18 @@ If your host has other Arcade MCP connectors too, Claude may pick the wrong one
 connected and prefer disabling other Arcade connectors while testing this
 plugin.
 
+## Telemetry
+
+Telemetry is **off** in this build (`TELEMETRY_ENABLED` is `false`): no usage
+events are sent and generated manifests include no telemetry hooks. When
+telemetry is enabled, the adapter in `hooks/telemetry-adapters/claude-code.mjs`
+classifies prompts, records `PreToolUse` on the plugin and claude.ai Arcade
+prefixes, and stores scope under `CLAUDE_PLUGIN_DATA`. Opt out with
+`ARCADE_PLUGIN_TELEMETRY=0`, `DISABLE_TELEMETRY`, or
+`CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`. See
+[telemetry.md](../telemetry.md) and
+[what CI exercises](../telemetry.md#what-ci-exercises).
+
 ## First steps
 
 - "What's on my calendar tomorrow?"
