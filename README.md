@@ -17,7 +17,7 @@
 <p align="center">
   <a href="https://api.arcade.dev/mcp/arcade"><img alt="Endpoint" src="https://img.shields.io/badge/endpoint-api.arcade.dev%2Fmcp%2Farcade-ff5c37"></a>
   <a href="https://agent-plugins.org"><img alt="Agent Plugins 1.0.0" src="https://img.shields.io/badge/Agent_Plugins-1.0.0-4f46e5"></a>
-  <a href="CHANGELOG.md"><img alt="Version" src="https://img.shields.io/badge/version-0.7.1-555"></a>
+  <a href="CHANGELOG.md"><img alt="Version" src="https://img.shields.io/github/v/release/arcadeai-labs/omnimcp?label=version&color=555"></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-555"></a>
 </p>
 
