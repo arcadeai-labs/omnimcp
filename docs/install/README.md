@@ -20,6 +20,15 @@ below have alternatives and verification steps.
 | **OpenCode** | Gateway URL only — [opencode.md](opencode.md) | [opencode.md](opencode.md) |
 | **Any MCP client** | `https://api.arcade.dev/mcp/arcade` | [agent-plugins.md](agent-plugins.md) |
 
+Cursor and VS Code one-click badges add the gateway only, without skills or
+the operator. For the full plugin:
+
+- **Cursor:** individual plans clone `https://github.com/ArcadeAI/arcade-plugin`
+  into `~/.cursor/plugins/local/arcade-plugin`; Teams/Enterprise use an
+  admin-imported team marketplace. See [cursor.md](cursor.md).
+- **VS Code:** Command Palette → **Chat: Install Plugin From Source** →
+  `https://github.com/ArcadeAI/arcade-plugin`. See [vscode.md](vscode.md).
+
 After install, reload your agent or start a new session. No API keys: the
 first task that touches an app returns a browser sign-in link.
 

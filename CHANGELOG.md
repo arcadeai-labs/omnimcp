@@ -4,6 +4,18 @@ All notable changes to Arcade are documented here.
 This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] (2026-10-20)
+
+### Features
+
+* mirror ArcadeAI/arcade-plugin 0.8.0: https://github.com/ArcadeAI/arcade-plugin/releases/tag/v0.8.0
+
+### Bug Fixes
+
+* keep the plugin's development packages, scripts, and tests in `dev/`, so installing it no longer installs them
+* keep 0.7.1's directory fixes; Cursor's validator is now downloaded by CI instead of kept in the repository
+* replace the old mirror check with typecheck, tests, and the ChatGPT ZIP build
+
 ## [0.7.1] (2026-10-19)
 
 ### Bug Fixes

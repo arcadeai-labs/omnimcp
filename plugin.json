@@ -14,16 +14,18 @@
     "agent-skills",
     "connected-apps"
   ],
-  "version": "0.7.1",
+  "version": "0.8.0",
   "repository": "https://github.com/ArcadeAI/arcade-plugin",
   "extensions": {
     "com.openai": {
       "interface": {
-        "displayName": "Arcade",
-        "shortDescription": "Your agent, every app you've connected.",
+        "displayName": "Arcade.dev",
+        "shortDescription": "Your agent, all your apps.",
+        "longDescription": "Your agent, every app you've connected. Ask in plain English — email, calendar, issues, chat — and Arcade finds and runs the right tool. Sign in once in the browser — without ever handing your agent a key.",
         "developerName": "Arcade.dev",
         "category": "Productivity",
         "websiteURL": "https://arcade.dev",
+        "privacyPolicyURL": "https://www.arcade.dev/privacy-policy/",
         "logo": "./assets/logo.png",
         "composerIcon": "./assets/logo.png"
       }

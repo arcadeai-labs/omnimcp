@@ -5,7 +5,9 @@ local install shows up on both surfaces. You get the Arcade gateway and both
 skills. Installing the plugin on the web does not deploy hook scripts.
 
 Arcade is not in OpenAI's public Plugins Directory. Add it from GitHub with
-one of the install paths below.
+one of the install paths below. The directory upload package,
+`arcade-chatgpt-{VERSION}.zip`, is attached to each
+[GitHub release](https://github.com/ArcadeAI/arcade-plugin/releases).
 
 Codex does not load `arcade-operator` from the plugin. OpenAI plugins can ship
 skills and MCP, but not custom agent roles yet

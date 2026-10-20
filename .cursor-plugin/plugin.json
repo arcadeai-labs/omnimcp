@@ -2,8 +2,7 @@
   "name": "arcade",
   "description": "Your agent, every app you've connected. Ask in plain English — email, calendar, issues, chat — and Arcade finds and runs the right tool. Sign in once in the browser — without ever handing your agent a key.",
   "author": {
-    "name": "Arcade.dev",
-    "url": "https://arcade.dev"
+    "name": "Arcade.dev"
   },
   "homepage": "https://arcade.dev",
   "license": "MIT",
@@ -13,7 +12,7 @@
     "agent-skills",
     "connected-apps"
   ],
-  "version": "0.7.1",
+  "version": "0.8.0",
   "displayName": "Arcade",
   "logo": "assets/logo.png",
   "repository": "https://github.com/ArcadeAI/arcade-plugin",

@@ -13,7 +13,7 @@ browser. The rows differ in how much of this plugin the client can load.
 | **Claude Code (CLI and desktop Code tab)** | ✅ | ✅ | ✅ | ✅ | — | ✅ | [guide](install/claude-code.md) |
 | **Claude Cowork** | ✅ | ✅ | ✅ | ✅ | — | partial⁴ | [guide](install/claude-code.md) |
 | **GitHub Copilot CLI** | ✅ | ✅ | ✅ | — | — | ✅⁵ | [guide](install/copilot.md) |
-| **VS Code** | ✅ | ✅ | ✅ | — | — | —⁶ | [guide](install/vscode.md) |
+| **VS Code (Copilot sessions)** | ✅ | ✅ | ✅ | — | — | ✅⁶ | [guide](install/vscode.md) |
 | **Codex / ChatGPT local runtime** | ✅ | ✅ | — | — | — | —⁷ | [guide](install/codex.md) |
 | **OpenCode** | ✅ | — | — | — | — | — | [guide](install/opencode.md) |
 | **Claude Desktop** | ✅ | ✅ | — | — | — | — | [guide](install/claude-desktop.md) |
@@ -25,7 +25,19 @@ full rules reach the main conversation. Partial means some hooks run but the
 session-start text doesn't reach the main conversation. The files are
 `.claude-plugin/hooks.json` (Claude Code),
 `clients/cursor/hooks/hooks.json` (Cursor CLI), and
-`com.github.copilot/hooks/hooks.json` (Copilot CLI).
+`com.github.copilot/hooks/hooks.json` (Copilot CLI and VS Code Copilot sessions).
+
+Telemetry adapters are separate from routing. **`TELEMETRY_ENABLED` is false**
+in this build, so manifests include no telemetry hooks and nothing is sent.
+When enabled, wiring comes from `hooks/hook-hosts.mjs`:
+
+| Client adapter | Telemetry events (when enabled) |
+| --- | --- |
+| Claude Code | `UserPromptSubmit`, `PreToolUse` on `^(?:mcp__plugin_arcade_arcade__\|mcp__claude_ai_arcade__)`, MCP `PostToolUse` / `PostToolUseFailure`, built-in `WebFetch` / `WebSearch` / listed `Bash` CLIs, Arcade operator `SubagentStop` |
+| Copilot CLI | `UserPromptSubmit`, MCP `PostToolUse` / `PostToolUseFailure` (`<server>-<tool>`), Arcade operator `SubagentStop` with `subagent_session` (no `PreToolUse`, no `turn`, no built-in tools) |
+
+Session start sends no telemetry event. No other adapter in this package sends telemetry. See
+[what's sent and its limits](telemetry.md).
 
 ¹ The Cursor IDE (3.21.18) lists the commands on the plugin page but not in
 the `/` menu. Other plugins' commands don't appear there either.
@@ -37,10 +49,14 @@ load the always-apply rule.
 ⁴ Cowork runs the prompt and subagent hooks but doesn't add the session-start
 text, so its main conversation gets the short reminder and the skill, not the
 full rules.
-⁵ Copilot CLI drops the output of prompt hooks from config files, so it gets
-session and subagent hooks only.
-⁶ VS Code reads `com.github.copilot/hooks/hooks.json` but doesn't expand
-`${PLUGIN_ROOT}` for Agent Plugins hooks or pass their output to the model yet.
+⁵ Copilot CLI drops the output of **routing** prompt hooks from config files,
+so the main conversation gets session and subagent hooks only. Telemetry still
+hooks `UserPromptSubmit` when enabled; `reminder_sent` is always `false` there.
+⁶ VS Code Copilot sessions use the shared Copilot hook implementation: this
+plugin supplies `SessionStart` and `SubagentStart` routing guidance through
+`com.github.copilot/hooks/hooks.json`. Support depends on the selected harness
+and VS Code version; see the [VS Code guide](install/vscode.md) for sources and
+validation limits.
 ⁷ Blocked upstream; see [codex.md](install/codex.md).
 
 Skills are `try-arcade` and `scale-arcade`. The subagent is

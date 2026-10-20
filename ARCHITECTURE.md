@@ -3,17 +3,20 @@
 A portable Agent Plugin (`plugin.json`, `mcp.json`, `skills/`) plus the files
 each client needs at its own path. Every client-specific file is generated
 from a few sources by `npm run generate`; `npm run verify` fails if one was
-edited by hand. The package ships no credentials.
+edited by hand. Both run from `dev/`, which holds the dev tooling so that
+installing the plugin doesn't install its packages. The package ships no
+credentials.
 
 | Source (edit these) | Holds |
 | --- | --- |
 | `plugin.json`, `mcp.json`, `VERSION` | identity, gateway URL, version, Codex listing metadata |
 | `hooks/routing-guidance.mjs` | the routing rules, as sentences |
 | `hooks/hook-hosts.mjs` | which hook script runs on which event in which client |
+| `hooks/telemetry-contract.mjs` | the telemetry event contract; also generates the event tables in docs/telemetry.md |
 | `agents/arcade-operator.agent.md` | the operator, outside its generated rules block |
 | `skills/` | the skills, outside the generated rules block in try-arcade |
 
-`scripts/generate-manifests.mjs` writes every generated file; the generated
+`dev/scripts/generate-manifests.mjs` writes every generated file; the generated
 `.gitattributes` lists them (GitHub collapses them in diffs).
 
 - The operator lives at `agents/arcade-operator.agent.md`, the only place both
@@ -85,6 +88,12 @@ success or narrating tool internals.
 
 The Arcade MCP server is the canonical place to record request, authentication,
 tool-discovery, tool-call, and completion outcomes. This package does not ask a
-model to self-report tokens, turns, or success, and it ships no telemetry hook.
-If a host-specific hook later adds supplemental signals, it must be explicit,
-opt-in, and documented as non-portable.
+model to self-report tokens, turns, or success.
+
+Optional client hooks in `hooks/telemetry-adapters/` can send supplemental,
+scoped usage events when `TELEMETRY_ENABLED` is `true` and the user has not
+opted out. **This build keeps `TELEMETRY_ENABLED` false**, so no telemetry
+hooks are generated and nothing is sent. See [docs/telemetry.md](docs/telemetry.md)
+for the contract, opt-outs, local state, and the separate approval required
+before collection can be enabled. Gateway telemetry remains authoritative;
+plugin events do not establish task success.
