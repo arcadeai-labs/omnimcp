@@ -85,7 +85,7 @@ const HASH = { type: "string", pattern: "^[0-9a-f]{16}$" };
 // VERSION, or "unknown" when it can't be read.
 const PLUGIN_VERSION_PATTERN = "^(unknown|[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?)$";
 const enumOf = (/** @type {readonly string[]} */ values) => ({ enum: [...values] });
-const list = (/** @type {readonly string[]} */ values) => values.map((value) => `\`${value}\``).join(" \\| ");
+const list = (/** @type {readonly string[]} */ values) => values.map((value) => `\`${value}\``).join(", ");
 
 /** Properties every event may carry. @type {Record<string, Property>} */
 export const COMMON_PROPERTIES = {
@@ -116,7 +116,7 @@ const ALWAYS_SENT = ["session", "arcade_used_before", "host", "plugin_version", 
 const TOOL_PROPERTIES = {
   server: {
     schema: enumOf(SERVERS),
-    doc: "`arcade` (this plugin's gateway) \\| `other_arcade` (another connection exposing Arcade's gateway tools) \\| `other`",
+    doc: "`arcade` (this plugin's gateway), `other_arcade` (another connection exposing Arcade's gateway tools), `other`",
   },
   tool: {
     schema: enumOf(["other", "app_tool", ...GATEWAY_TOOLS]),
@@ -146,7 +146,7 @@ const TOOL_ATTEMPTED_PROPERTIES = {
   ...TOOL_PROPERTIES,
   server: {
     schema: enumOf(["arcade", "other_arcade"]),
-    doc: "`arcade` (this plugin's gateway) \\| `other_arcade` (the claude.ai Arcade connection)",
+    doc: "`arcade` (this plugin's gateway), `other_arcade` (the claude.ai Arcade connection)",
   },
 };
 
