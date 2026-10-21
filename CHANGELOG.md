@@ -4,6 +4,12 @@ All notable changes to Arcade are documented here.
 This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2] (2026-10-21)
+
+### Bug Fixes
+
+* directory release registers only the SessionStart hook v0.6.0 already shipped, and telemetry no longer reads the process environment
+
 ## [0.8.0] (2026-10-20)
 
 ### Features

@@ -14,7 +14,7 @@
     "agent-skills",
     "connected-apps"
   ],
-  "version": "0.8.1",
+  "version": "0.8.2",
   "repository": "https://github.com/ArcadeAI/arcade-plugin",
   "extensions": {
     "com.openai": {

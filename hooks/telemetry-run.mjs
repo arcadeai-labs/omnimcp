@@ -1,20 +1,13 @@
 // @ts-check
 /** Opt-out checks and the shared telemetry hook body. Never throws. */
 
-import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { scopeForInput } from "./hook-scope.mjs";
-import { ARCADE_USED_FILE, EVENT_ENV, OPT_OUT_ENV, TELEMETRY_ENABLED } from "./telemetry-config.mjs";
+import { ARCADE_USED_FILE, OPT_OUT_ENV, TELEMETRY_ENABLED } from "./telemetry-config.mjs";
 import { buildEvent, isArcadeCall } from "./telemetry-events.mjs";
 
 /** @typedef {import("./telemetry-adapter.mjs").TelemetryAdapter} TelemetryAdapter */
-
-const SENDER = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "telemetry-send.mjs",
-);
 
 const OFF_VALUES = ["0", "false", "off", "no"];
 
@@ -26,7 +19,7 @@ const isSet = (/** @type {string} */ value) => value !== "" && !OFF_VALUES.inclu
  * @param {{ name: string, anyValue: boolean }[]} optOutSwitches
  * @param {NodeJS.ProcessEnv} env
  */
-export const isOptedOut = (optOutSwitches, env = process.env) => {
+export const isOptedOut = (optOutSwitches, env = {}) => {
   if (OFF_VALUES.includes((env[OPT_OUT_ENV] ?? "").toLowerCase())) return true;
   if (isSet(env.DO_NOT_TRACK ?? "")) return true;
   return optOutSwitches.some(({ name, anyValue }) => {
@@ -64,7 +57,7 @@ const markArcadeUsed = (/** @type {string} */ dir) => {
  */
 export const clearSessionScope = ({
   adapter,
-  env = process.env,
+  env = {},
   input = {},
   enabled = false,
 }) => {
@@ -82,26 +75,8 @@ export const clearSessionScope = ({
   }
 };
 
-const defaultSend = (/** @type {object} */ event, env = process.env) => {
-  // Claude Code kills hook processes when the session exits, so the network
-  // call runs in a detached child that can outlive this hook. The event goes
-  // in an environment variable, not an argument, because other users on the
-  // machine can read a process's arguments but not its environment. Pass only
-  // PATH, SystemRoot (Windows needs it for network calls), and the event. Do
-  // not copy the parent environment.
-  /** @type {Record<string, string>} */
-  const childEnv = { [EVENT_ENV]: JSON.stringify(event) };
-  if (env.PATH) childEnv.PATH = env.PATH;
-  if (env.SystemRoot) childEnv.SystemRoot = env.SystemRoot;
-  const child = spawn(process.execPath, [SENDER], {
-    detached: true,
-    stdio: "ignore",
-    windowsHide: true,
-    env: childEnv,
-  });
-  child.on("error", () => {});
-  child.unref();
-};
+// Telemetry is off. Do not read the process environment or start a child.
+const defaultSend = () => {};
 
 /**
  * @param {object} options
@@ -117,10 +92,10 @@ export const runTelemetry = async ({
   input,
   adapter,
   argv = process.argv,
-  env = process.env,
+  env = {},
   now = Date.now(),
   enabled = false,
-  send = (event) => defaultSend(event, env),
+  send = defaultSend,
 }) => {
   try {
     if (!enabled && !TELEMETRY_ENABLED) return;

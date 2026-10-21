@@ -21,12 +21,8 @@ Copilot CLI reads the portable Agent Plugins components (`plugin.json`,
 `com.github.copilot/agents/arcade-operator.agent.md`. You get 2 skills, the
 gateway, and `arcade-operator`.
 
-Hooks come from `com.github.copilot/hooks/hooks.json`: routing rules at
-session start and for subagents. Copilot CLI drops the output of prompt hooks
-from config files, so there's no per-prompt reminder here. VS Code's Copilot
-sessions use the same hook implementation and manifest for session and subagent
-routing guidance; see the [VS Code guide](vscode.md) for harness/version scope
-and validation limits.
+This release does not register `com.github.copilot/hooks/hooks.json`. Copilot
+CLI and VS Code still load the skills, the gateway, and `arcade-operator`.
 
 ## Telemetry
 
@@ -38,9 +34,6 @@ and session-scoped prompt state under `COPILOT_PLUGIN_DATA` (no `turn`, no
 [telemetry.md](../telemetry.md) for opt-outs (`ARCADE_PLUGIN_TELEMETRY=0` and
 `COPILOT_OFFLINE`) and
 [what CI exercises](../telemetry.md#what-ci-exercises).
-
-Shared `com.github.copilot/hooks/hooks.json` uses `runOnlyIfScriptExists` to
-exit quietly when the plugin path or script is missing.
 
 ## First steps
 

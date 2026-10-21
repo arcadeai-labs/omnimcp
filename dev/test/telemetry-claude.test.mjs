@@ -282,6 +282,8 @@ test("Claude opt-out switches send nothing and write no data dir files", async (
 test("enabled Claude manifest wiring matches hooks.enabled.json", async () => {
   const rows = [
     ...HOOKS.filter((hook) => hook.script !== "telemetry.mjs"),
+    { script: "user-prompt-submit.mjs", event: "UserPromptSubmit", hosts: ["claude-code"] },
+    { script: "subagent-start.mjs", event: "SubagentStart" },
     ...(await telemetryHookRows()).filter((row) => row.hosts.includes("claude-code")),
   ];
   const built = buildHookManifest("claude-code", rows);

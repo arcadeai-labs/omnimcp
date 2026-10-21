@@ -11,21 +11,18 @@ browser. The rows differ in how much of this plugin the client can load.
 | **Cursor IDE / Cloud Agents** | ✅ | ✅ | ✅ | ✅¹ | ✅ | —² | [guide](install/cursor.md) |
 | **Cursor CLI** | ✅ | ✅ | ✅ | ✅ | — | ✅³ | [guide](install/cursor.md) |
 | **Claude Code (CLI and desktop Code tab)** | ✅ | ✅ | ✅ | ✅ | — | ✅ | [guide](install/claude-code.md) |
-| **Claude Cowork** | ✅ | ✅ | ✅ | ✅ | — | partial⁴ | [guide](install/claude-code.md) |
-| **GitHub Copilot CLI** | ✅ | ✅ | ✅ | — | — | ✅⁵ | [guide](install/copilot.md) |
-| **VS Code (Copilot sessions)** | ✅ | ✅ | ✅ | — | — | ✅⁶ | [guide](install/vscode.md) |
+| **Claude Cowork** | ✅ | ✅ | ✅ | ✅ | — | —⁴ | [guide](install/claude-code.md) |
+| **GitHub Copilot CLI** | ✅ | ✅ | ✅ | — | — | —⁵ | [guide](install/copilot.md) |
+| **VS Code (Copilot sessions)** | ✅ | ✅ | ✅ | — | — | —⁶ | [guide](install/vscode.md) |
 | **Codex / ChatGPT local runtime** | ✅ | ✅ | — | — | — | —⁷ | [guide](install/codex.md) |
 | **OpenCode** | ✅ | — | — | — | — | — | [guide](install/opencode.md) |
 | **Claude Desktop** | ✅ | ✅ | — | — | — | — | [guide](install/claude-desktop.md) |
 | **Any MCP client** | ✅ | — | — | — | — | — | [guide](install/agent-plugins.md) |
 
-Hooks add the routing rules at session start, to each prompt, and to
-subagents. In the Hooks column, ✅ means the session-start hook runs, so the
-full rules reach the main conversation. Partial means some hooks run but the
-session-start text doesn't reach the main conversation. The files are
-`.claude-plugin/hooks.json` (Claude Code),
-`clients/cursor/hooks/hooks.json` (Cursor CLI), and
-`com.github.copilot/hooks/hooks.json` (Copilot CLI and VS Code Copilot sessions).
+This directory release registers only the session-start hook, which is the
+hook v0.6.0 already shipped. Prompt and subagent reminders are not registered.
+The files are `.claude-plugin/hooks.json` (Claude Code) and
+`clients/cursor/hooks/hooks.json` (Cursor CLI).
 
 Telemetry adapters are separate from routing. **`TELEMETRY_ENABLED` is false**
 in this build, so manifests include no telemetry hooks and nothing is sent.
@@ -46,17 +43,12 @@ always-apply rule carries the full session rules. Cloud Agents run repo, team,
 and enterprise hooks only; they get the rule and the skill.
 ³ Session hook only. The CLI runs the session hook (full rules) but doesn't
 load the always-apply rule.
-⁴ Cowork runs the prompt and subagent hooks but doesn't add the session-start
-text, so its main conversation gets the short reminder and the skill, not the
-full rules.
-⁵ Copilot CLI drops the output of **routing** prompt hooks from config files,
-so the main conversation gets session and subagent hooks only. Telemetry still
-hooks `UserPromptSubmit` when enabled; `reminder_sent` is always `false` there.
-⁶ VS Code Copilot sessions use the shared Copilot hook implementation: this
-plugin supplies `SessionStart` and `SubagentStart` routing guidance through
-`com.github.copilot/hooks/hooks.json`. Support depends on the selected harness
-and VS Code version; see the [VS Code guide](install/vscode.md) for sources and
-validation limits.
+⁴ Cowork does not receive the session-start text, so this release adds no
+hook text to its main conversation. It still gets the skill.
+⁵ This release does not register Copilot hooks. Skills and the operator still
+load.
+⁶ This release does not register the shared Copilot hook file, so VS Code
+Copilot sessions do not get session or subagent routing from it.
 ⁷ Blocked upstream; see [codex.md](install/codex.md).
 
 Skills are `try-arcade` and `scale-arcade`. The subagent is

@@ -37,15 +37,11 @@ export const HOSTS = {
     events: { SessionStart: "sessionStart" },
     contextOutput: (_eventName, text) => ({ additional_context: text }),
   },
-  // Copilot CLI. PascalCase names put it in its VS Code-compatible mode
-  // (snake_case SessionStart input; SubagentStart still sends camelCase
-  // agentName in 1.0.88); it drops prompt-hook output, so it has no prompt
-  // reminder hook. The other events it lists run only telemetry.
-  // VS Code Copilot sessions use the shared Copilot hook implementation and
-  // this manifest for session/subagent context (see docs/install/vscode.md).
-  // The script-existence check is defensive when the plugin path or script
-  // is missing; it is not a VS Code capability limit.
+  // Not shipped. v0.6.0 had no Copilot hook file, and the directory holds an
+  // update that adds one. Telemetry tests still build a manifest from this
+  // host when collection is enabled.
   copilot: {
+    ship: false,
     manifest: "com.github.copilot/hooks/hooks.json",
     format: "flat",
     rootVariable: "PLUGIN_ROOT",
@@ -91,10 +87,10 @@ export const telemetryHookRows = async () => {
  * (added to the command) work only in the nested format.
  */
 export const HOOKS = [
+  // Only SessionStart ships. The directory holds an update that adds hooks
+  // beyond the approved v0.6.0 surface. Prompt and subagent scripts stay in
+  // the repo for the follow-up and are not registered.
   { script: "session-start.mjs", event: "SessionStart" },
-  // Copilot CLI drops prompt-hook output, so only Claude Code runs this one.
-  { script: "user-prompt-submit.mjs", event: "UserPromptSubmit", hosts: ["claude-code"] },
-  { script: "subagent-start.mjs", event: "SubagentStart" },
   // No telemetry hooks are written while telemetry is off (telemetry-config.mjs).
   ...(TELEMETRY_ENABLED ? await telemetryHookRows() : []),
 ];

@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { test } from "node:test";
 import { HOOKS, HOSTS, telemetryHookRows } from "../../hooks/hook-hosts.mjs";
@@ -337,14 +337,15 @@ test("malformed hook input without a prompt sends nothing", async () => {
 test("enabled Copilot manifest wiring matches hooks.enabled.json", async () => {
   const rows = [
     ...HOOKS.filter((hook) => hook.script !== "telemetry.mjs"),
+    { script: "subagent-start.mjs", event: "SubagentStart" },
     ...(await telemetryHookRows()).filter((row) => row.hosts.includes("copilot")),
   ];
   const built = buildHookManifest("copilot", rows);
   assert.deepEqual(built, enabledManifest);
 });
 
-test("checked-in Copilot manifest has no telemetry rows", () => {
-  assert.equal(readRepoFile(HOSTS.copilot.manifest).includes("telemetry.mjs"), false);
+test("this release does not ship a Copilot hooks file", () => {
+  assert.equal(existsSync(path.join(ROOT, HOSTS.copilot.manifest)), false);
 });
 
 test("enabled telemetry commands exit quietly while telemetry is off", skipOnWindows, async () => {

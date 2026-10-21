@@ -70,8 +70,8 @@ twice and split its components. See [cursor.md](docs/install/cursor.md).
 | **Cursor IDE / Cloud Agents** | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | **Cursor CLI** | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 | **Claude Code** | ✅ | ✅ | ✅ | ✅ | — | ✅ |
-| **Claude Cowork** | ✅ | ✅ | ✅ | ✅ | — | partial |
-| **GitHub Copilot CLI** | ✅ | ✅ | ✅ | — | — | ✅ |
+| **Claude Cowork** | ✅ | ✅ | ✅ | ✅ | — | — |
+| **GitHub Copilot CLI** | ✅ | ✅ | ✅ | — | — | — |
 | **VS Code** | ✅ | ✅ | ✅ | — | — | — |
 | **Codex / ChatGPT** | ✅ | ✅ | — | — | — | — |
 | **OpenCode** | ✅ | — | — | — | — | — |

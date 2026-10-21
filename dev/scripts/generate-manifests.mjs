@@ -68,7 +68,9 @@ export const FILE_SOURCES = {
   // the version, entry type, nesting, and command template. With telemetry
   // enabled, the adapter that hook-hosts.mjs names supplies telemetry entries.
   ...Object.fromEntries(
-    Object.values(HOSTS).map((h) => [h.manifest, ["hooks/hook-hosts.mjs", "dev/scripts/generate-manifests.mjs"]]),
+    Object.values(HOSTS)
+      .filter((h) => h.ship !== false)
+      .map((h) => [h.manifest, ["hooks/hook-hosts.mjs", "dev/scripts/generate-manifests.mjs"]]),
   ),
   "skills/scale-arcade/references/arcade-docs.md": ["skills/try-arcade/references/arcade-docs.md"],
   // A copy of the operator with its rules block filled in.
@@ -273,6 +275,7 @@ const buildFiles = (root) => {
   ]);
 
   for (const [hostName, host] of Object.entries(HOSTS)) {
+    if (host.ship === false) continue;
     files.set(host.manifest, serialize(buildHookManifest(hostName)));
   }
 
