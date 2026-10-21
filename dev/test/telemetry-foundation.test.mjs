@@ -79,7 +79,7 @@ test("session-start with telemetry off creates no scope dir and still prints rou
 });
 
 test("routing hooks still exit 0 with malformed stdin", () => {
-  for (const script of ["session-start.mjs", "subagent-start.mjs", "user-prompt-submit.mjs"]) {
+  for (const script of ["session-start.mjs", "subagent-start.mjs"]) {
     const result = spawnSync(process.execPath, [path.join(ROOT, "hooks", script), "--host", "claude-code"], {
       input: "not-json",
       encoding: "utf8",

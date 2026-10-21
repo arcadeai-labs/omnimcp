@@ -19,10 +19,10 @@ browser. The rows differ in how much of this plugin the client can load.
 | **Claude Desktop** | ✅ | ✅ | — | — | — | — | [guide](install/claude-desktop.md) |
 | **Any MCP client** | ✅ | — | — | — | — | — | [guide](install/agent-plugins.md) |
 
-Hooks add the routing rules at session start, to each prompt, and to
-subagents. In the Hooks column, ✅ means the session-start hook runs, so the
-full rules reach the main conversation. Partial means some hooks run but the
-session-start text doesn't reach the main conversation. The files are
+Hooks add routing rules at session start and, for Copilot, to subagents. In
+the Hooks column, ✅ means the session-start hook runs, so the full rules reach
+the main conversation. Partial means some hooks run but the session-start text
+doesn't reach the main conversation. The files are
 `.claude-plugin/hooks.json` (Claude Code),
 `clients/cursor/hooks/hooks.json` (Cursor CLI), and
 `com.github.copilot/hooks/hooks.json` (Copilot CLI and VS Code Copilot sessions).
@@ -46,9 +46,8 @@ always-apply rule carries the full session rules. Cloud Agents run repo, team,
 and enterprise hooks only; they get the rule and the skill.
 ³ Session hook only. The CLI runs the session hook (full rules) but doesn't
 load the always-apply rule.
-⁴ Cowork runs the prompt and subagent hooks but doesn't add the session-start
-text, so its main conversation gets the short reminder and the skill, not the
-full rules.
+⁴ Cowork runs the session-start hook but doesn't add its text to the main
+conversation, so the main conversation gets the skill, not the full rules.
 ⁵ Copilot CLI drops the output of **routing** prompt hooks from config files,
 so the main conversation gets session and subagent hooks only. Telemetry still
 hooks `UserPromptSubmit` when enabled; `reminder_sent` is always `false` there.

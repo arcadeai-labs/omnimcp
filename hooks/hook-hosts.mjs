@@ -92,9 +92,7 @@ export const telemetryHookRows = async () => {
  */
 export const HOOKS = [
   { script: "session-start.mjs", event: "SessionStart" },
-  // Copilot CLI drops prompt-hook output, so only Claude Code runs this one.
-  { script: "user-prompt-submit.mjs", event: "UserPromptSubmit", hosts: ["claude-code"] },
-  { script: "subagent-start.mjs", event: "SubagentStart" },
+  { script: "subagent-start.mjs", event: "SubagentStart", hosts: ["copilot"] },
   // No telemetry hooks are written while telemetry is off (telemetry-config.mjs).
   ...(TELEMETRY_ENABLED ? await telemetryHookRows() : []),
 ];
