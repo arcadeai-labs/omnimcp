@@ -3,7 +3,8 @@
 ## Full plugin
 
 ```bash
-copilot plugin install ArcadeAI/arcade-plugin
+copilot plugin marketplace add ArcadeAI/arcade-plugin
+copilot plugin install arcade@arcade
 ```
 
 The cross-client CLI works too; it runs Copilot's own `copilot plugin`
