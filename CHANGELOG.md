@@ -4,6 +4,14 @@ All notable changes to Arcade are documented here.
 This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.4] (2026-10-22)
+
+### Bug Fixes
+
+* no manifest names a bundled image: drop the Codex `logo` and `composerIcon` and the Cursor `logo` (GRO-664)
+* remove the ChatGPT ZIP builder and the Claude install check from `dev/scripts`, which the directory flagged as forwarding credential environment variables (GRO-664)
+* remove the Codex and Copilot install checks from `dev/scripts`; they pass environment variables into those CLIs the same way (GRO-664)
+
 ## [0.8.3] (2026-10-22)
 
 ### Bug Fixes

@@ -7,9 +7,10 @@ import { readRepoFile, ROOT } from "./helpers.mjs";
 test(".cursor-plugin paths exist", () => {
   const manifest = JSON.parse(readRepoFile(".cursor-plugin/plugin.json"));
   assert.equal(manifest.displayName, "Arcade");
-  for (const key of ["skills", "agents", "commands", "rules", "logo"]) {
+  for (const key of ["skills", "agents", "commands", "rules"]) {
     assert.ok(existsSync(path.join(ROOT, manifest[key])), `missing ${manifest[key]}`);
   }
+  assert.equal(manifest.logo, undefined, ".cursor-plugin/plugin.json must not name a bundled image");
 });
 
 test("commands are named arcade-* and listed in the support matrix and README", () => {

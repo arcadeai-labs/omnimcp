@@ -50,13 +50,9 @@ const INLINE_CODE = /`[^`]*`/g;
 const COMPONENT_FOLDERS = ["agents/", "commands/", "skills/"];
 
 // The portal holds a version for a reviewer when a manifest names a bundled
-// image. These fields stay because Codex, ChatGPT, and Cursor show them as the
-// listing logo.
-const ALLOWED_MEDIA_PATH_FIELDS = [
-  { file: "plugin.json", field: ["extensions", "com.openai", "interface", "logo"] },
-  { file: "plugin.json", field: ["extensions", "com.openai", "interface", "composerIcon"] },
-  { file: ".cursor-plugin/plugin.json", field: ["logo"] },
-];
+// image (UNREAD_ASSET_REFERENCED, GRO-664), so no manifest field may name one.
+/** @type {{ file: string, field: string[] }[]} */
+const ALLOWED_MEDIA_PATH_FIELDS = [];
 
 function git(args) {
   return execFileSync("git", args, { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * MIB });

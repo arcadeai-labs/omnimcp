@@ -108,7 +108,7 @@ ChatGPT, Codex, and OpenCode don't run telemetry hooks from this package.
 | Adapter | Tested in this repo | Not covered here |
 | --- | --- | --- |
 | Claude Code | In-process hook captures, contract tests, `claude plugin validate --strict` on **2.1.258** (runs on the committed manifest, which has no telemetry hooks; no CLI has validated a manifest with telemetry hooks enabled) | Live user sessions, IDE extensions, desktop Code tab, Cowork delivery and opt-out |
-| Copilot CLI | In-process captures, fixture JSON, contract tests, `npm run verify:copilot` on **1.0.88** (runs on the committed manifest, which has no telemetry hooks; checks only MCP servers and skills; no CLI has validated a manifest with telemetry hooks enabled) | Live sessions, Windows PowerShell hook commands, VS Code agent sessions |
+| Copilot CLI | In-process captures, fixture JSON, and contract tests (the committed manifest has no telemetry hooks; no CLI has validated a manifest with telemetry hooks enabled) | Live sessions, Windows PowerShell hook commands, VS Code agent sessions |
 
 None of these checks prove end-user transmission while `TELEMETRY_ENABLED` is
 `false`. The in-process tests exercise adapter behavior for an enabled build.
