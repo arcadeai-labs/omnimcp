@@ -4,6 +4,12 @@ All notable changes to Arcade are documented here.
 This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.3] (2026-10-22)
+
+### Bug Fixes
+
+* removed the unused credential-forwarding workflow fixture (GRO-664)
+
 ## [0.8.2] (2026-10-21)
 
 ### Bug Fixes
