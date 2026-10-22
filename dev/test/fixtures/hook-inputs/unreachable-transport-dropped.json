@@ -1,4 +1,0 @@
-{
-  "error": "MCP server \"arcade\" transport dropped mid-call; response for tool \"Slack_SendMessage\" was lost",
-  "is_interrupt": false
-}

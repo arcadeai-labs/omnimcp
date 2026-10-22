@@ -1,9 +1,9 @@
 # Plugin telemetry
 
 **Telemetry is off in this build.** The plugin sends no usage events, and
-`npm run generate` writes no telemetry hooks into any client manifest. This
-build also ships no PostHog key, and `hooks/telemetry-send.mjs` exits without
-reading the environment or contacting a server.
+no client manifest registers a telemetry hook. This build also ships no
+PostHog key, and `hooks/telemetry-send.mjs` exits without reading the
+environment or contacting a server.
 `TELEMETRY_ENABLED` in `hooks/telemetry-config.mjs` stays `false` until
 collection is separately approved after ingestion, opt-outs, privacy, and
 distribution requirements are verified.
@@ -255,11 +255,8 @@ shipping telemetry hooks. Confirm, outside this repository:
 The change that turns telemetry on also has to add an event sender to
 `hooks/telemetry-send.mjs`, a PostHog project key to
 `hooks/telemetry-config.mjs`, and a call to `clearSessionScope` in
-`hooks/session-start.mjs`, and update the test in
-`dev/test/telemetry-off.test.mjs` that checks this build ships none of them.
-Tests can't point the sender at a local server until it reads a host override
-again.
+`hooks/session-start.mjs`. This build ships none of them.
 
-These are release acceptance requirements; the current code and CI do not
+These are release acceptance requirements; the current code does not
 enforce them. A repository install can consume a branch before a GitHub release
 is tagged, so a branch install can transmit data before any release is tagged.

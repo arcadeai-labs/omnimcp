@@ -107,12 +107,9 @@ anything is sent, created, or deleted.
 
 ## Develop
 
-Agents editing this repo should read [AGENTS.md](AGENTS.md).
-
-```bash
-npm ci
-npm run verify
-```
+Agents editing this repo should read [AGENTS.md](AGENTS.md). Development
+packages, scripts, and tests are not in this tree, so installing the plugin
+does not install them.
 
 ## License
 
