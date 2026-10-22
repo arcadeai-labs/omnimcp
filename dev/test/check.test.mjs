@@ -20,11 +20,9 @@ test("plugin.json and mcp.json match the vendored Agent Plugins 1.0 schemas", ()
   }
   const openaiListing = plugin.extensions?.["com.openai"]?.interface;
   assert.ok(openaiListing?.displayName, "plugin.json: Codex displayName");
+  // The Claude plugin directory holds a version whose manifest names a bundled image (GRO-664).
   for (const key of ["logo", "composerIcon"]) {
-    const file = openaiListing?.[key];
-    assert.ok(file && existsSync(path.join(ROOT, file)), `plugin.json: Codex ${key} must point at a committed file`);
-    // Codex's own plugins all write these paths with a leading "./".
-    assert.match(file, /^\.\//, `plugin.json: Codex ${key} must start with ./`);
+    assert.equal(openaiListing?.[key], undefined, `plugin.json: Codex ${key} must not name a bundled image`);
   }
 });
 

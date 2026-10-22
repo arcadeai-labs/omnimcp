@@ -205,12 +205,12 @@ const buildFiles = (root) => {
   // company, so the OpenAI listing uses "Arcade.dev". The other clients keep
   // "Arcade".
   const displayName = "Arcade";
-  if (!openaiListing.logo) {
-    throw new Error("plugin.json extensions.com.openai.interface.logo is missing");
+  // No manifest names a bundled image: the Claude plugin directory holds a
+  // version for a reviewer when a manifest names an image or font file
+  // (UNREAD_ASSET_REFERENCED, GRO-664).
+  if (openaiListing.logo || openaiListing.composerIcon) {
+    throw new Error("plugin.json extensions.com.openai.interface must not name a logo or composerIcon file");
   }
-  // Codex wants the logo path with a leading "./"; Cursor takes it without one.
-  // The Claude marketplace has no logo field.
-  const logo = openaiListing.logo.replace(/^\.\//, "");
   const { name, description, author, homepage, license, keywords, repository } = plugin;
   const identity = { name, description, author, homepage, license, keywords, version };
 
@@ -222,7 +222,6 @@ const buildFiles = (root) => {
         // Cursor's manifest schema allows only `name` and `email` in `author`.
         author: { name: author.name },
         displayName,
-        logo,
         repository,
         skills: "skills",
         agents: "agents",
