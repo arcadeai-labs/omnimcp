@@ -4,6 +4,12 @@ All notable changes to Arcade are documented here.
 This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.5] (2026-10-22)
+
+### Bug Fixes
+
+* remove development tooling and the check workflow from the repo, so the installed plugin contains only plugin files; behavior is unchanged
+
 ## [0.8.4] (2026-10-22)
 
 ### Bug Fixes

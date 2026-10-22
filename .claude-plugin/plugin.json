@@ -13,7 +13,7 @@
     "agent-skills",
     "connected-apps"
   ],
-  "version": "0.8.4",
+  "version": "0.8.5",
   "displayName": "Arcade",
   "privacyPolicyUrl": "https://www.arcade.dev/privacy-policy/",
   "hooks": "./.claude-plugin/hooks.json",

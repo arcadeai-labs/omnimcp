@@ -2,10 +2,9 @@
 
 A portable Agent Plugin (`plugin.json`, `mcp.json`, `skills/`) plus the files
 each client needs at its own path. Every client-specific file is generated
-from a few sources by `npm run generate`; `npm run verify` fails if one was
-edited by hand. Both run from `dev/`, which holds the dev tooling so that
-installing the plugin doesn't install its packages. The package ships no
-credentials.
+from a few sources and checked in. Development packages, scripts, and tests
+stay out of this tree, so installing the plugin does not install them. The
+package ships no credentials.
 
 | Source (edit these) | Holds |
 | --- | --- |
@@ -16,8 +15,7 @@ credentials.
 | `agents/arcade-operator.agent.md` | the operator, outside its generated rules block |
 | `skills/` | the skills, outside the generated rules block in try-arcade |
 
-`dev/scripts/generate-manifests.mjs` writes every generated file; the generated
-`.gitattributes` lists them (GitHub collapses them in diffs).
+`.gitattributes` lists every generated file (GitHub collapses them in diffs).
 
 - The operator lives at `agents/arcade-operator.agent.md`, the only place both
   Claude Code and Cowork accept. Copilot CLI and VS Code only read
@@ -28,7 +26,7 @@ credentials.
   [docs/install/codex.md](docs/install/codex.md).
 
 Release Please bumps `VERSION`, `plugin.json`, and the version fields in the
-generated manifests; a test replays that bump and checks nothing goes stale.
+generated manifests.
 
 ## Execution model
 
